@@ -33,7 +33,9 @@
   --paper:#121826; --grid:rgba(140,170,240,.07); --card:#1b2334; --line:#2d3a55;
   --text:#e6ebf6; --muted:#9aa6c4; --ink:#a9c0ff; --ink-2:#22305a;
   --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); color-scheme:dark}
-html,body{min-height:100%}
+[hidden]{display:none!important}
+html,body{min-height:100%;margin:0}
+img{max-width:100%}
 body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--text);font-family:var(--f-ui);font-size:18px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
 .wrap{max-width:760px;margin:0 auto;display:grid;gap:20px}
