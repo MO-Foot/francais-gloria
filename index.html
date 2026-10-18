@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1d3a8a">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Français">
+<title>Le français de Gloria</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Playwrite+FR+Moderne:wght@300;400&display=swap">
+<style>
+/* Layout: un quaderno a quadretti. Colonna unica centrata, tasti grandi per tablet; inchiostro blu per il francese, penna rossa per le correzioni. */
+:root{
+  --veil:rgba(18,28,60,.6);
+  --paper:#fbfcff; --grid:rgba(60,100,190,.12); --card:#ffffff; --line:#d3dcef;
+  --text:#1b2335; --muted:#5b6784; --ink:#1d3a8a; --ink-2:#e8eeff;
+  --red:#cf3329; --red-2:#fdeceb; --green:#1f8754; --green-2:#e5f6ed; --gold:#e3a614;
+  --f-script:"Playwrite FR Moderne","Comic Sans MS",cursive;
+  --f-ui:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121826; --grid:rgba(140,170,240,.07); --card:#1b2334; --line:#2d3a55;
+  --text:#e6ebf6; --muted:#9aa6c4; --ink:#a9c0ff; --ink-2:#22305a;
+  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121826; --grid:rgba(140,170,240,.07); --card:#1b2334; --line:#2d3a55;
+  --text:#e6ebf6; --muted:#9aa6c4; --ink:#a9c0ff; --ink-2:#22305a;
+  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); color-scheme:dark}
+html,body{min-height:100%}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--text);font-family:var(--f-ui);font-size:18px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+.wrap{max-width:760px;margin:0 auto;display:grid;gap:20px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--f-script);color:var(--ink);font-size:clamp(24px,5vw,34px);line-height:1.6;cursor:pointer}
+.hbtns{display:flex;gap:8px}
+button{font:inherit;color:inherit;cursor:pointer}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font-size:16px}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink-2);color:var(--ink);font-weight:700}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+h2{font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.units{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:620px){.cards{grid-template-columns:1fr}}
+.scheda{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:20px 18px;text-align:left;display:grid;gap:6px;min-height:150px;align-content:start;transition:transform .15s,border-color .15s}
+.scheda:hover{border-color:var(--ink);transform:translateY(-2px)}
+.scheda .ico{font-size:36px;line-height:1}
+.scheda .fr{font-family:var(--f-script);color:var(--ink);font-size:22px;line-height:1.7}
+.scheda .it{color:var(--muted);font-size:16px}
+.note{color:var(--muted);font-size:15px}
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:20px}
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.dots{display:flex;gap:6px;flex-wrap:wrap}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--line)}
+.dot.ok{background:var(--green);border-color:var(--green)} .dot.ko{background:var(--red);border-color:var(--red)} .dot.now{border-color:var(--ink)}
+.prompt{display:grid;gap:12px;justify-items:center;text-align:center;padding:8px 0 4px}
+.ask{color:var(--muted);font-size:17px}
+.big{font-size:84px;line-height:1.1}
+.fw{font-family:var(--f-script);color:var(--ink);font-size:clamp(26px,6vw,38px);line-height:1.7}
+body.print .fw, body.print .opt .fr, body.print .scheda .fr, body.print .brand{font-family:var(--f-ui);font-weight:700;line-height:1.3}
+.digit{font-size:72px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.bubble{background:var(--ink-2);color:var(--text);border-radius:18px 18px 18px 4px;padding:12px 16px;max-width:520px;text-align:left}
+.bubble b{color:var(--ink)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.opt{background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:14px 10px;min-height:84px;display:grid;place-items:center;gap:4px;text-align:center}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt .fr{font-family:var(--f-script);color:var(--ink);font-size:24px;line-height:1.7}
+.opt .em{font-size:54px;line-height:1.1}
+.opt.right{border-color:var(--green);background:var(--green-2)} .opt.wrong{border-color:var(--red);background:var(--red-2)}
+.opt:disabled{cursor:default}
+.sw{display:inline-block;width:56px;height:18px;border-radius:5px;border:1.5px solid var(--muted)}
+.swbig{width:120px;height:44px;border-radius:8px}
+.objc{display:grid;justify-items:center;gap:4px}
+.say{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{border:none;background:var(--ink);color:var(--paper);border-radius:999px;padding:12px 22px;font-weight:700;font-size:18px}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+.btn.big{font-size:22px;padding:16px 30px}
+.type{display:grid;gap:10px;margin-top:8px}
+.type input{font:inherit;font-size:24px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);width:100%;box-sizing:border-box}
+.keys{display:flex;gap:6px;flex-wrap:wrap}
+.key{border:1.5px solid var(--line);background:var(--card);border-radius:10px;min-width:46px;padding:8px 10px;font-size:20px}
+.fb{border-radius:12px;padding:14px 16px;display:grid;gap:6px}
+.fb.ok{background:var(--green-2);border:1.5px solid var(--green)} .fb.ko{background:var(--red-2);border:1.5px solid var(--red)}
+.fb .t{font-weight:700} .fb.ok .t{color:var(--green)} .fb.ko .t{color:var(--red)}
+.fb .sol{font-family:var(--f-script);color:var(--ink);font-size:24px;line-height:1.7}
+.transcript{font-size:16px;color:var(--muted);display:grid;gap:2px;text-align:left}
+.transcript b{color:var(--text)}
+.row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.stars{font-size:56px;letter-spacing:6px;text-align:center}
+.score{font-size:28px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:16px;font-variant-numeric:tabular-nums}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+textarea{font:13px ui-monospace,Menlo,monospace;width:100%;box-sizing:border-box;min-height:110px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);padding:10px}
+.warn{background:var(--red-2);border:1.5px solid var(--red);border-radius:12px;padding:10px 14px;font-size:15px}
+.newword{font-size:15px;color:var(--muted)}
+.timer{font-variant-numeric:tabular-nums;min-width:118px}
+.timer.idle{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
+.timer.warn{border-color:var(--red);color:var(--red);background:var(--red-2);font-weight:700}
+.startbig{justify-self:start}
+#lock{position:fixed;inset:0;z-index:50;background:var(--veil);display:grid;place-items:center;padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.lockbox{background:var(--card);border:2px solid var(--ink);border-radius:20px;padding:28px 22px;max-width:460px;width:100%;box-sizing:border-box;text-align:center;display:grid;gap:14px}
+.locktxt{font-size:22px;margin:0}
+#b-parent{justify-self:center;font-size:14px;color:var(--muted);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="lock" hidden role="dialog" aria-modal="true" aria-labelledby="locktitle"><div class="lockbox">
+  <div class="big">🌟</div>
+  <div class="fw" id="locktitle">C'est fini pour aujourd'hui !</div>
+  <p class="locktxt">Per oggi hai lavorato abbastanza, brava!<br>Chiama <b>papà</b> o <b>mamma</b>.</p>
+  <div class="note" id="locksum"></div>
+  <button id="b-parent" class="chip">Solo per papà e mamma: tieni premuto 3 secondi</button>
+  <div id="parentopts" hidden class="row" style="justify-content:center"><button class="btn ghost" data-extra="5">+5 minuti</button><button class="btn" data-extra="15">+15 minuti</button></div>
+</div></div>
+
+<script>
+/* ===== DATI (modificabili: aggiungi qui le parole delle nuove unità) ===== */
+const GOMME='<svg width="64" height="44" viewBox="0 0 64 44" aria-label="gomma"><rect x="4" y="8" width="56" height="28" rx="6" fill="#f4a3b6" stroke="#7a3a4a" stroke-width="2"/><rect x="34" y="8" width="26" height="28" rx="6" fill="#5a8be0" stroke="#7a3a4a" stroke-width="2"/></svg>';
+const V=[ // nomi: u=unità, g=genere
+ {fr:'frère',g:'m',u:2,it:'il fratello',e:'👦'},
+ {fr:'sœur',g:'f',u:2,it:'la sorella',e:'👧'},
+ {fr:'chien',g:'m',u:2,it:'il cane',e:'🐶'},
+ {fr:'chat',g:'m',u:2,it:'il gatto',e:'🐱'},
+ {fr:'hamster',g:'m',u:2,it:'il criceto',e:'🐹'},
+ {fr:'dragon',g:'m',u:2,it:'il drago',e:'🐉'},
+ {fr:'perruche',g:'f',u:2,it:'il pappagallino',e:'🦜'},
+ {fr:'poisson rouge',g:'m',u:2,it:'il pesce rosso',e:'🐠'},
+ {fr:'tortue',g:'f',u:2,it:'la tartaruga',e:'🐢'},
+ {fr:'crayon',g:'m',u:3,it:'la matita',e:'✏️'},
+ {fr:'gomme',g:'f',u:3,it:'la gomma',svg:GOMME},
+ {fr:'stylo',g:'m',u:3,it:'la penna',e:'🖊️'},
+ {fr:'règle',g:'f',u:3,it:'la riga',e:'📏'},
+ {fr:'livre',g:'m',u:3,it:'il libro',e:'📖'},
+ {fr:'trousse',g:'f',u:3,it:"l'astuccio",e:'👝'}
+];
+const COL=[ // colori (Unité 3) – solo forma maschile, come sul quaderno
+ {fr:'blanc',it:'bianco',c:'#ffffff'},{fr:'bleu',it:'blu',c:'#2f6fd6'},{fr:'noir',it:'nero',c:'#151515'},
+ {fr:'rouge',it:'rosso',c:'#e23b2e'},{fr:'jaune',it:'giallo',c:'#f2c81c'},{fr:'vert',it:'verde',c:'#2e9b4a'}
+];
+const NUM=['un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix'];
+const PHR=[
+ {fr:'Bonjour monsieur !',it:'Buongiorno signore!',u:1},{fr:'Bonjour madame !',it:'Buongiorno signora!',u:1},
+ {fr:'Salut !',it:'Ciao!',u:1},{fr:'Au revoir !',it:'Arrivederci!',u:1},{fr:'Ça va ?',it:'Come va?',u:1},
+ {fr:"Je m'appelle Gloria.",it:'Mi chiamo Gloria.',u:1},{fr:"Comment tu t'appelles ?",it:'Come ti chiami?',u:2},
+ {fr:'Tu as quel âge ?',it:'Quanti anni hai?',u:2},{fr:"J'ai huit ans.",it:'Ho otto anni.',u:2},
+ {fr:"Je n'ai pas de frère.",it:'Non ho fratelli.',u:2},{fr:"Qu'est-ce que c'est ?",it:"Cos'è?",u:3}
+];
+const MOI=[ // domande su di sé (Scrittura)
+ {u:1,q:"Comment tu t'appelles ?",it:'Come ti chiami?',a:["Je m'appelle Gloria."]},
+ {u:1,q:'Ça va ?',it:'Come va?',a:['Oui, ça va.','Ça va.']},
+ {u:2,q:'Tu as quel âge ?',it:'Quanti anni hai? (scrivi il numero in lettere)',a:["J'ai huit ans."]},
+ {u:2,q:'Tu as un frère ?',it:'Hai un fratello?',a:["Non, je n'ai pas de frère.","Je n'ai pas de frère."]},
+ {u:2,q:'Tu as une sœur ?',it:'Hai una sorella? (une = una)',a:["Oui, j'ai une sœur.","J'ai une sœur."]},
+ {u:2,q:"Ta sœur s'appelle comment ?",it:'Come si chiama tua sorella?',a:["Elle s'appelle Giulia."]}
+];
+const FILL=[ // completa
+ {u:1,b:'',a:'Ça',e:' va ? Oui, ça va.',it:'Come va? Sì, va bene.'},
+ {u:1,b:'Au ',a:'revoir',e:' !',it:'Arrivederci!'},
+ {u:1,b:"Je m'",a:'appelle',e:' Gloria.',it:'Mi chiamo Gloria.'},
+ {u:1,b:"Comment tu t'",a:'appelles',e:' ?',it:'Come ti chiami?'},
+ {u:1,b:'Giulia s’',a:'appelle',e:'.',it:'Giulia si chiama.'},
+ {u:2,b:"J'ai deux frère",a:'s',e:'.',it:'Ho due fratelli. (manca una lettera!)'},
+ {u:2,b:"Je n'ai pas ",a:'de',e:' frère.',it:'Non ho fratelli.'},
+ {u:2,b:"J'ai ",a:'une',e:' sœur.',it:'Ho una sorella.'},
+ {u:3,b:"Qu'est-ce que c'",a:'est',e:' ?',it:"Cos'è?"}
+];
+const DLG=[ // dialoghi per l'ascolto (c = bambino, f = donna, m = uomo)
+ {u:[1,2],l:[['Léo','c',"Salut ! Je m'appelle Léo."],['Léo','c',"J'ai neuf ans."],['Léo','c',"J'ai un frère et un chien."]],
+  q:[{q:'Come si chiama il bambino?',o:['Léo','Luca','Lino'],a:0},{q:'Quanti anni ha Léo?',o:['7','8','9'],a:2},{q:'Che animale ha Léo?',o:['🐶','🐱','🐢'],a:0,pic:1}]},
+ {u:[1,2],l:[['Mia','c',"Bonjour ! Je m'appelle Mia."],['Mia','c',"J'ai huit ans."],['Mia','c',"Je n'ai pas de frère. J'ai une sœur et une tortue."]],
+  q:[{q:'Mia ha un fratello?',o:['Sì','No'],a:1},{q:'Che animale ha Mia?',o:['🐹','🐢','🦜'],a:1,pic:1},{q:'Quanti anni ha Mia?',o:['6','8','10'],a:1}]},
+ {u:[1,2],l:[['Giulia','c',"Salut ! Je m'appelle Giulia."],['Giulia','c',"J'ai six ans."],['Giulia','c',"Ma sœur s'appelle Gloria."]],
+  q:[{q:'Quanti anni ha Giulia?',o:['5','6','8'],a:1},{q:'Come si chiama la sorella di Giulia?',o:['Mia','Gloria','Valentina'],a:1}]},
+ {u:[1],l:[['Papa Marco','m','Je compte les ballons de foot : un, deux, trois, quatre, cinq, six, sept !']],nw:'ballon = pallone',
+  q:[{q:'Quanti palloni conta papà Marco?',o:['6','7','8'],a:1}]},
+ {u:[1],l:[['Papa Marco','m','Bonjour madame ! Ça va ?'],['Maman Valentina','f','Oui, ça va ! Au revoir !']],
+  q:[{q:'Come sta mamma Valentina?',o:['Bene 🙂','Male 🙁'],a:0},{q:'Alla fine mamma Valentina dice…',o:['Ciao, come va?','Arrivederci!'],a:1}]},
+ {u:[3],l:[['Maman Valentina','f',"Gloria, qu'est-ce que c'est ?"],['Gloria','c',"C'est ma trousse rouge."]],
+  q:[{q:"Che cos'è?",o:[['trousse','rouge'],['trousse','jaune'],['stylo','rouge']],a:0,obj:1}]},
+ {u:[3],l:[['Giulia','c',"Gloria, qu'est-ce que c'est ?"],['Gloria','c',"C'est mon crayon vert."]],
+  q:[{q:"Che cos'è?",o:[['crayon','vert'],['stylo','vert'],['crayon','bleu']],a:0,obj:1}]}
+];
+/* oggetti + colori senza problemi di accordo (maschili con tutti i colori; femminili solo con rouge/jaune) */
+const OBJ_M=['crayon','stylo','livre'], OBJ_F=['trousse','gomme','règle'], COL_INV=['rouge','jaune'];
+
+/* ===== STATO ===== */
+const KEY='gloria-fr-v1';
+let S={units:[1,2,3],stats:{},history:[],script:true,slow:false};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) S=Object.assign(S,s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let run=null, screen='home';
+
+/* ===== UTILI ===== */
+const $=s=>document.querySelector(s);
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=a=>a[Math.random()*a.length|0];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const art=v=>(v.g==='m'?'le ':'la ')+v.fr;
+const byFr=f=>V.find(v=>v.fr===f), colBy=f=>COL.find(c=>c.fr===f);
+const nounPic=(v,cls='big')=>v.svg?`<span class="${cls}">${v.svg}</span>`:`<span class="${cls}">${v.e}</span>`;
+const sw=(c,cls='sw')=>`<span class="${cls}" style="background:${c.c}"></span>`;
+const objPic=(o,c)=>`<span class="objc">${nounPic(byFr(o),'em')}${sw(colBy(c))}</span>`;
+const on=u=>S.units.includes(u);
+function norm(s,strict){
+  s=String(s).toLowerCase().replace(/[’‘`´]/g,"'").replace(/œ/g,'oe').replace(/[.!?,;:«»"¿¡]/g,' ').replace(/\s*'\s*/g,"'").replace(/\s+/g,' ').trim();
+  if(!strict) s=s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+  return s;
+}
+
+/* ===== VOCE ===== */
+let voices=[];
+function loadVoices(){try{voices=speechSynthesis.getVoices().filter(v=>/^fr/i.test(v.lang))}catch(e){voices=[]}}
+if('speechSynthesis' in window){loadVoices(); speechSynthesis.onvoiceschanged=loadVoices;}
+function pickVoice(){return voices.find(v=>/fr[-_]CH/i.test(v.lang))||voices.find(v=>/fr[-_]FR/i.test(v.lang))||voices[0]||null}
+function speak(lines){ // lines: [[text,'c'|'f'|'m'],...]
+  if(!('speechSynthesis' in window)) return;
+  try{speechSynthesis.cancel()}catch(e){}
+  const v=pickVoice();
+  lines.forEach(([t,who])=>{
+    const u=new SpeechSynthesisUtterance(t);
+    u.lang=v?v.lang:'fr-FR'; if(v) u.voice=v;
+    u.rate=S.slow?0.6:0.85; u.pitch=who==='c'?1.35:who==='m'?0.8:1.05;
+    speechSynthesis.speak(u);
+  });
+}
+const say1=t=>speak([[t,'f']]);
+
+/* ===== DOMANDE ===== */
+function nouns(){return V.filter(v=>on(v.u))}
+function mcq(o){return Object.assign({type:'mc'},o)}
+function gen(kind){
+  const N=nouns(), useC=on(3), useN=on(1);
+  const pools=[];
+  if(kind==='voc'){
+    if(N.length+(useC?6:0)>=4) pools.push([5,()=>{ // immagine → parola
+      const items=[...N.map(v=>({k:art(v),pic:nounPic(v),g:'n',u:v.u})),...(useC?COL.map(c=>({k:c.fr,pic:sw(c,'sw swbig'),g:'c'})):[])];
+      const it=pick(items), same=items.filter(x=>x.g===it.g&&x!==it);
+      const o=sh([it,...sh(same).slice(0,3)]);
+      return mcq({key:it.k,ask:'Come si dice in francese?',body:it.pic,opts:o.map(x=>`<span class="fr">${esc(x.k)}</span>`),a:o.indexOf(it),sayAfter:it.k});
+    }]);
+    if(N.length) pools.push([2,()=>{const v=pick(N); return mcq({key:art(v),ask:'le o la?',body:`${nounPic(v)}<span class="fw">___ ${esc(v.fr)}</span>`,opts:['<span class="fr">le</span>','<span class="fr">la</span>'],a:v.g==='m'?0:1,sayAfter:art(v),tip:v.fr==='livre'?'le livre: libro è maschile anche in francese.':v.fr==='tortue'?'la tortue: come la tartaruga.':''})}]);
+    if(useN) pools.push([2,()=>{const n=Math.random()*10|0; const o=sh([n,...sh([...Array(10).keys()].filter(x=>x!==n)).slice(0,3)]);
+      return mcq({key:NUM[n],ask:'Come si scrive questo numero?',body:`<span class="digit">${n+1}</span>`,opts:o.map(x=>`<span class="fr">${NUM[x]}</span>`),a:o.indexOf(n),sayAfter:NUM[n]})}]);
+    const P=PHR.filter(p=>on(p.u)); if(P.length>=4) pools.push([2,()=>{const p=pick(P),o=sh([p,...sh(P.filter(x=>x!==p)).slice(0,3)]);
+      return mcq({key:p.fr,ask:'Come si dice in francese?',body:`<span class="bubble">${esc(p.it)}</span>`,opts:o.map(x=>`<span class="fr" style="font-size:20px">${esc(x.fr)}</span>`),a:o.indexOf(p),sayAfter:p.fr})}]);
+  }
+  if(kind==='eco'){
+    const items=[...N.map(v=>({k:art(v),pic:nounPic(v,'em'),g:'n'})),...(useC?COL.map(c=>({k:c.fr,pic:sw(c,'sw swbig'),g:'c'})):[])];
+    if(items.length>=4) pools.push([4,()=>{const it=pick(items),same=items.filter(x=>x.g===it.g&&x!==it),o=sh([it,...sh(same).slice(0,3)]);
+      return mcq({key:it.k,listen:[[it.k,'f']],ask:'Ascolta e tocca il disegno giusto',opts:o.map(x=>x.pic),a:o.indexOf(it),reveal:it.k})}]);
+    if(useN) pools.push([2,()=>{const n=Math.random()*10|0,o=sh([n,...sh([...Array(10).keys()].filter(x=>x!==n)).slice(0,3)]);
+      return mcq({key:NUM[n],listen:[[NUM[n],'f']],ask:'Ascolta e tocca il numero',opts:o.map(x=>`<span class="digit" style="font-size:48px">${x+1}</span>`),a:o.indexOf(n),reveal:NUM[n]})}]);
+    if(useC) pools.push([3,()=>{
+      const combos=[];OBJ_M.forEach(o=>COL.forEach(c=>combos.push([o,c.fr])));OBJ_F.forEach(o=>COL_INV.forEach(c=>combos.push([o,c])));
+      const t=pick(combos); const near=sh(combos.filter(x=>x!==t&&(x[0]===t[0]||x[1]===t[1]))).slice(0,3); const o=sh([t,...near]);
+      const txt=art(byFr(t[0]))+' '+t[1];
+      return mcq({key:txt,listen:[[txt,'f']],ask:'Ascolta: quale oggetto e di che colore?',opts:o.map(x=>objPic(x[0],x[1])),a:o.indexOf(t),reveal:txt})}]);
+    const D=DLG.filter(d=>d.u.every(on)); if(D.length) pools.push([4,()=>{const d=pick(D),q=pick(d.q);
+      const opts=q.obj?q.o.map(x=>objPic(x[0],x[1])):q.o.map(x=>q.pic?`<span class="em">${x}</span>`:`<span style="font-size:22px;font-weight:700">${esc(x)}</span>`);
+      return mcq({key:'dialogo: '+d.l[0][0],listen:d.l.map(x=>[x[2],x[1]]),ask:q.q,opts,a:q.a,transcript:d.l,nw:d.nw})}]);
+  }
+  if(kind==='ecr'){
+    const T=[...N.map(v=>({k:art(v),it:v.it,pic:nounPic(v),noun:v.fr})),...(useC?COL.map(c=>({k:c.fr,it:c.it,pic:sw(c,'sw swbig')})):[]),...(useN?NUM.map((n,i)=>({k:n,it:'il numero '+(i+1),pic:`<span class="digit">${i+1}</span>`})):[])];
+    if(T.length) pools.push([4,()=>{const t=pick(T); return {type:'tx',key:t.k,ask:'Aiuta Giulia!',body:`${t.pic}<span class="bubble"><b>Giulia:</b> «Gloria, come si dice <b>${esc(t.it)}</b> in francese?»</span>`,ans:[t.k],noun:t.noun}}]);
+    if(on(3)&&N.length) pools.push([3,()=>{const v=pick(N); const pos=(v.g==='m'?'mon ':'ma ')+v.fr;
+      return {type:'tx',key:pos,ask:'Scrivi mon o ma',body:`${nounPic(v)}<span class="fw">C'est ___ ${esc(v.fr)}.</span>`,ans:[v.g==='m'?'mon':'ma'],sayFull:"C'est "+pos,tip:v.g==='m'?`mon perché si dice ${art(v)}`:`ma perché si dice ${art(v)}`}}]);
+    const M=MOI.filter(m=>on(m.u)); if(M.length) pools.push([3,()=>{const m=pick(M);
+      return {type:'tx',key:m.q,listen:[[m.q,'f']],ask:'Rispondi con una frase',body:`<span class="fw" style="font-size:28px">${esc(m.q)}</span><span class="ask">${esc(m.it)}</span>`,ans:m.a}}]);
+    const F=FILL.filter(f=>on(f.u)); if(F.length) pools.push([2,()=>{const f=pick(F);
+      return {type:'tx',key:f.b+f.a+f.e,ask:'Completa la frase',body:`<span class="fw" style="font-size:28px">${esc(f.b)}<u>&nbsp;?&nbsp;</u>${esc(f.e)}</span><span class="ask">${esc(f.it)}</span>`,ans:[f.a],sayFull:f.b+f.a+f.e}}]);
+  }
+  return pools;
+}
+function build(kind,n=8){
+  const pools=gen(kind); if(!pools.length) return [];
+  const qs=[],seen=new Set(); let guard=0;
+  while(qs.length<n&&guard++<200){
+    const tot=pools.reduce((s,p)=>s+p[0],0); let r=Math.random()*tot, f=pools[0][1];
+    for(const p of pools){if((r-=p[0])<0){f=p[1];break}}
+    const q=f(); if(seen.has(q.key+q.ask)&&guard<150) continue; seen.add(q.key+q.ask); qs.push(q);
+  }
+  return qs;
+}
+
+/* ===== SCHERMATE ===== */
+const NAMES={voc:['📚','Vocabulaire','Vocabolario'],eco:['🎧','Écoute','Ascolto'],ecr:['✍️','Écriture','Scrittura']};
+function render(){
+  document.body.classList.toggle('print',!S.script);
+  const head=`<header><div class="brand" data-go="home">Le français de Gloria</div><div class="hbtns">
+    <button class="chip timer" id="b-timer"></button>
+    <button class="chip" id="b-font" aria-pressed="${!S.script}" title="Corsivo o stampatello">${S.script?'Aa corsivo':'Aa stampatello'}</button>
+    <button class="chip" data-go="prog" aria-pressed="${screen==='prog'}">⭐ Progressi</button></div></header>`;
+  let body='';
+  if(screen==='home') body=homeView(); else if(screen==='quiz') body=quizView(); else if(screen==='end') body=endView(); else body=progView();
+  $('#app').innerHTML=head+body; bind();
+}
+function homeView(){
+  const noVoice=!('speechSynthesis' in window)?'<div class="warn">Questo browser non può leggere ad alta voce: la scheda Ascolto non funzionerà.</div>':'';
+  const t=T(), st=(!t.run&&left()>0)?`<section style="display:grid;gap:10px"><button class="btn big startbig" id="b-go">▶ Inizio a lavorare</button><span class="note">Hai ${fmt(left())} minuti di francese per oggi. Il tempo parte quando tocchi Inizio.</span></section>`:'';
+  return st+`<section style="display:grid;gap:10px"><h2>Unità da ripassare</h2><div class="units">
+    ${[1,2,3].map(u=>`<button class="chip" data-unit="${u}" aria-pressed="${on(u)}">Unité ${u}</button>`).join('')}</div>
+    <div class="note">Unité 1: saluti, s'appeler, numeri 1–10 · Unité 2: famiglia, animali, età · Unité 3: astuccio, colori, mon/ma</div></section>
+    <section style="display:grid;gap:10px"><h2>Scegli la scheda</h2><div class="cards">
+    ${Object.entries(NAMES).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr">${n[1]}</span><span class="it">${n[2]} · 8 domande</span></button>`).join('')}
+    </div></section>${noVoice}`;
+}
+function quizView(){
+  const q=run.qs[run.i];
+  const dots=run.qs.map((x,i)=>`<span class="dot ${x.res===true?'ok':x.res===false?'ko':i===run.i?'now':''}"></span>`).join('');
+  let main=`<div class="prompt"><div class="ask">${esc(q.ask)}</div>${q.body||''}`;
+  if(q.listen) main+=`<div class="say"><button class="btn" id="b-say">🔊 Ascolta</button><button class="chip" id="b-slow" aria-pressed="${S.slow}">🐢 Lento</button></div>`;
+  main+='</div>';
+  if(q.type==='mc'){
+    main+=`<div class="opts" style="${q.opts.length===3?'grid-template-columns:repeat(3,1fr)':''}">${q.opts.map((o,i)=>{
+      let c=''; if(run.done){ if(i===q.a)c='right'; else if(i===run.choice)c='wrong'; }
+      return `<button class="opt ${c}" data-opt="${i}" ${run.done?'disabled':''}>${o}</button>`}).join('')}</div>`;
+  } else {
+    main+=`<div class="type"><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Scrivi qui…" ${run.done?'disabled':''} value="${esc(run.typed||'')}">
+      ${run.done?'':`<div class="keys">${["é","è","ê","à","ç","œ","'"].map(k=>`<button class="key" data-k="${k}">${k}</button>`).join('')}</div>
+      <div class="row"><span></span><button class="btn" id="b-check">Controlla</button></div>`}</div>`;
+  }
+  if(run.done) main+=fbView(q);
+  return `<div class="panel" style="display:grid;gap:16px"><div class="top"><span class="note">${NAMES[run.kind][0]} ${NAMES[run.kind][2]} · ${run.i+1}/${run.qs.length}</span><div class="dots">${dots}</div></div>${main}</div>`;
+}
+function fbView(q){
+  const ok=q.res; let h=`<div class="fb ${ok?'ok':'ko'}"><span class="t">${ok?pick(['Bravissima!','Très bien !','Super !','Esatto!']):'Non proprio…'}</span>`;
+  if(q.type==='tx'){ h+=`<span>Risposta giusta:</span><span class="sol">${esc(q.sayFull||q.ans[0])}</span>`; if(run.note) h+=`<span>${esc(run.note)}</span>`; }
+  if(q.reveal) h+=`<span>Hai sentito: <span class="sol">${esc(q.reveal)}</span></span>`;
+  if(q.sayAfter&&!ok) h+=`<span class="sol">${esc(q.sayAfter)}</span>`;
+  if(q.tip) h+=`<span>${esc(q.tip)}</span>`;
+  if(q.transcript) h+=`<div class="transcript">${q.transcript.map(l=>`<span><b>${esc(l[0])}:</b> ${esc(l[2])}</span>`).join('')}${q.nw?`<span class="newword">Parola nuova: ${esc(q.nw)}</span>`:''}</div>`;
+  h+=`</div><div class="row"><button class="btn ghost" id="b-rep">🔊 Riascolta</button><button class="btn big" id="b-next">${run.i+1<run.qs.length?'Avanti →':'Fine ⭐'}</button></div>`;
+  return h;
+}
+function endView(){
+  const sc=run.qs.filter(q=>q.res).length, t=run.qs.length, p=sc/t, st=p>=.9?3:p>=.7?2:p>=.4?1:0;
+  const wrong=run.qs.filter(q=>!q.res);
+  return `<div class="panel" style="display:grid;gap:16px"><div class="stars" aria-label="${st} stelle">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div>
+   <div class="score">${sc} / ${t}</div><div class="fw" style="text-align:center">${st===3?'Bravo Gloria !':st===2?'Très bien !':'Continue, Gloria !'}</div>
+   ${wrong.length?`<div><h2>Da ripassare</h2><div class="transcript" style="margin-top:6px">${wrong.map(q=>`<span>• ${esc(q.key)}</span>`).join('')}</div></div>`:''}
+   <div class="row"><button class="btn ghost" data-go="home">Menu</button><button class="btn big" data-start="${run.kind}">Un'altra scheda</button></div></div>`;
+}
+function progView(){
+  const st=Object.entries(S.stats).map(([k,v])=>({k,...v})).filter(x=>x.ko>0).sort((a,b)=>(b.ko-b.ok/2)-(a.ko-a.ok/2)).slice(0,10);
+  const hist=S.history.slice(-10).reverse();
+  return `<div class="panel" style="display:grid;gap:18px">
+   <div><h2>Ultime schede</h2>${hist.length?`<div style="overflow-x:auto"><table><tr><th>Data</th><th>Scheda</th><th>Punti</th></tr>${hist.map(h=>`<tr><td>${esc(h.d)}</td><td>${NAMES[h.k][2]}</td><td>${h.s}/${h.t}</td></tr>`).join('')}</table></div>`:'<p class="note">Nessuna scheda ancora: inizia dal menu!</p>'}</div>
+   <div><h2>Parole su cui sbaglia di più</h2>${st.length?`<div style="overflow-x:auto"><table><tr><th>Parola</th><th>Giuste</th><th>Sbagliate</th></tr>${st.map(x=>`<tr><td>${esc(x.k)}</td><td>${x.ok}</td><td>${x.ko}</td></tr>`).join('')}</table></div>`:'<p class="note">Ancora nessun errore registrato.</p>'}</div>
+   <div style="display:grid;gap:8px"><h2>Salva / ripristina (JSON)</h2><p class="note">I progressi restano su questo tablet. Per un backup scarica il file (o copia il testo); per ripristinare scegli il file o incolla il testo qui sotto.</p>
+   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units}))}</textarea>
+   <div class="row"><button class="btn" id="b-dl">Scarica backup</button><button class="btn ghost" id="b-copy">Copia</button><span class="note" id="copymsg"></span></div>
+   <textarea id="imp" placeholder="Incolla qui un backup JSON…"></textarea>
+   <div class="row"><input type="file" id="file" accept=".json,application/json"><button class="btn" id="b-imp">Importa</button></div><span class="note" id="impmsg"></span>
+   <div class="row"><span class="note">Azzera tutti i progressi</span><button class="btn ghost" id="b-reset">${resetArm?'Sicuro? Tocca di nuovo':'Azzera'}</button></div></div></div>`;
+}
+let resetArm=false;
+
+/* ===== AZIONI ===== */
+function start(kind){
+  if(!startTimer()) return;
+  const qs=build(kind); if(!qs.length){alertBox('Scegli almeno un\'unità adatta a questa scheda.');return}
+  run={kind,qs,i:0,done:false}; screen='quiz'; render(); autoSay();
+}
+function autoSay(){const q=run.qs[run.i]; if(q.listen) speak(q.listen)}
+function record(q,ok){const s=S.stats[q.key]||(S.stats[q.key]={ok:0,ko:0}); ok?s.ok++:s.ko++; q.res=ok; save()}
+function answerMC(i){
+  const q=run.qs[run.i]; if(run.done) return; run.choice=i; run.done=true; record(q,i===q.a); render();
+  if(q.sayAfter) say1(q.sayAfter);
+}
+function check(){
+  const q=run.qs[run.i], v=$('#in').value; if(!v.trim()) return; run.typed=v; run.note='';
+  let ok=false;
+  for(const a of q.ans){
+    if(norm(v,1)===norm(a,1)){ok=true;break}
+    if(norm(v,0)===norm(a,0)){ok=true;run.note='Giusto! Attenzione solo agli accenti.';break}
+  }
+  if(!ok&&q.noun&&norm(v,0)===norm(q.noun,0)) run.note='Manca l\'articolo: le o la?';
+  if(!ok&&q.ans.some(a=>norm(v,0).replace(/[^a-z']/g,'')===norm(a,0).replace(/[^a-z']/g,''))){ok=true;run.note='Giusto! Controlla solo spazi e apostrofi.'}
+  run.done=true; record(q,ok); render(); say1(q.sayFull||q.ans[0]);
+}
+function next(){
+  try{speechSynthesis.cancel()}catch(e){}
+  if(run.i+1<run.qs.length){run.i++;run.done=false;run.typed='';run.note='';render();autoSay();if(run.qs[run.i].type==='tx')setTimeout(()=>{const i=$('#in');i&&i.focus()},50)}
+  else{const d=new Date();S.history.push({d:d.toLocaleDateString('it-CH')+' '+d.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'}),k:run.kind,s:run.qs.filter(q=>q.res).length,t:run.qs.length});save();screen='end';render()}
+}
+function alertBox(msg){const w=document.createElement('div');w.className='warn';w.textContent=msg;$('#app').appendChild(w);setTimeout(()=>w.remove(),3500)}
+function doImport(txt){
+  try{const o=JSON.parse(txt); if(typeof o!=='object'||!o) throw 0;
+    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units;
+    save(); render(); $('#impmsg').textContent='Backup importato ✔';
+  }catch(e){$('#impmsg').textContent='Il testo non è un backup valido: incolla tutto il JSON copiato prima.'}
+}
+function bind(){
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{try{speechSynthesis.cancel()}catch(e){};resetArm=false;screen=b.dataset.go;render()});
+  document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>start(b.dataset.start));
+  document.querySelectorAll('[data-unit]').forEach(b=>b.onclick=()=>{const u=+b.dataset.unit; if(on(u)){if(S.units.length>1)S.units=S.units.filter(x=>x!==u)}else S.units=[...S.units,u].sort(); save(); render()});
+  document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>answerMC(+b.dataset.opt));
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const i=$('#in'),s=i.selectionStart??i.value.length,e=i.selectionEnd??s;i.value=i.value.slice(0,s)+b.dataset.k+i.value.slice(e);i.focus();i.setSelectionRange(s+1,s+1)});
+  const bt=$('#b-timer'); if(bt) bt.onclick=()=>{if(!T().run){startTimer();render()}};
+  const bg=$('#b-go'); if(bg) bg.onclick=()=>{startTimer();render()};
+  updTimer();
+  const f=$('#b-font'); if(f) f.onclick=()=>{S.script=!S.script;save();render()};
+  const bs=$('#b-say'); if(bs) bs.onclick=autoSay;
+  const sl=$('#b-slow'); if(sl) sl.onclick=()=>{S.slow=!S.slow;save();sl.setAttribute('aria-pressed',S.slow);autoSay()};
+  const bc=$('#b-check'); if(bc) bc.onclick=check;
+  const inp=$('#in'); if(inp&&!run.done) inp.onkeydown=e=>{if(e.key==='Enter')check()};
+  const bn=$('#b-next'); if(bn) bn.onclick=next;
+  const br=$('#b-rep'); if(br) br.onclick=()=>{const q=run.qs[run.i]; if(q.listen&&q.type==='mc') speak(q.listen); else say1(q.sayFull||q.reveal||q.sayAfter||(q.ans&&q.ans[0])||q.key)};
+  const cp=$('#b-copy'); if(cp) cp.onclick=()=>{const t=$('#exp');navigator.clipboard.writeText(t.value).then(()=>$('#copymsg').textContent='Copiato ✔',()=>{t.select();$('#copymsg').textContent='Testo selezionato: copialo a mano.'})};
+  const dl=$('#b-dl'); if(dl) dl.onclick=()=>{try{const b=new Blob([$('#exp').value],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup-francais-gloria-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();$('#copymsg').textContent='Backup scaricato ✔'}catch(e){$('#copymsg').textContent='Download non riuscito: usa Copia.'}};
+  const bi=$('#b-imp'); if(bi) bi.onclick=()=>doImport($('#imp').value);
+  const fi=$('#file'); if(fi) fi.onchange=()=>{const r=new FileReader();r.onload=()=>doImport(r.result);if(fi.files[0])r.readAsText(fi.files[0])};
+  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.history=[];save();resetArm=false;render()};
+}
+/* ===== TIMER: 15 minuti al giorno ===== */
+const LIMIT=15*60*1000;
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+function T(){if(!S.t||S.t.day!==today())S.t={day:today(),used:0,run:false,extra:0};return S.t}
+const left=()=>{const t=T();return Math.max(0,LIMIT+t.extra-t.used)};
+const fmt=ms=>{const s=Math.ceil(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+let lastTick=null;
+function startTimer(){const t=T(); if(left()<=0){showLock();return false} if(!t.run){t.run=true;lastTick=Date.now();save()} return true}
+function updTimer(){const b=$('#b-timer'); if(!b) return; const t=T(), l=left();
+  b.className='chip timer'+(!t.run&&l>0?' idle':t.run&&l<60000?' warn':'');
+  b.textContent=!t.run&&l>0?'▶ Inizia · '+fmt(l):l>0?'⏱ '+fmt(l):'⏱ 0:00';
+  b.setAttribute('aria-label',t.run?'Tempo rimasto '+fmt(l):'Inizia il timer');}
+function tick(){const t=T();
+  if(t.run&&!document.hidden){const now=Date.now(); if(lastTick) t.used+=now-lastTick; lastTick=now;} else lastTick=null;
+  if(t.run&&left()<=0){t.run=false; save(); showLock();}
+  else if(t.run) save();
+  updTimer();}
+function showLock(){try{speechSynthesis.cancel()}catch(e){}
+  const d=new Date().toLocaleDateString('it-CH'), n=S.history.filter(h=>String(h.d).startsWith(d)).length;
+  $('#locksum').textContent=n?`Oggi hai completato ${n} ${n===1?'scheda':'schede'} ⭐`:'';
+  $('#parentopts').hidden=true; $('#b-parent').hidden=false; $('#lock').hidden=false; updTimer();}
+(function(){const b=$('#b-parent'); let h=null;
+  const stop=()=>{clearTimeout(h);h=null;b.textContent='Solo per papà e mamma: tieni premuto 3 secondi'};
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.textContent='Continua a tenere premuto…';h=setTimeout(()=>{h=null;b.hidden=true;$('#parentopts').hidden=false},3000)});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{if(h)stop()}));
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+  document.querySelectorAll('[data-extra]').forEach(x=>x.onclick=()=>{const t=T(); t.extra=Math.max(t.extra,t.used-LIMIT)+(+x.dataset.extra)*60000; t.run=true; lastTick=Date.now(); save(); $('#lock').hidden=true; stop(); updTimer();});
+})();
+setInterval(tick,1000);
+document.addEventListener('visibilitychange',()=>{lastTick=null;if(!document.hidden&&T().run)lastTick=Date.now()});
+render();
+if(T().used>0&&left()<=0) showLock();
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(e=>console.warn("Service Worker non registrato:",e.message))})}
+</script>
+</body>
+</html>
