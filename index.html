@@ -17,7 +17,7 @@
 <style>
 /* Layout: un quaderno a quadretti. Colonna unica centrata, tasti grandi per tablet; inchiostro blu per il francese, penna rossa per le correzioni. */
 :root{
-  --veil:rgba(18,28,60,.6);
+  --veil:rgba(18,28,60,.6); --orange:#d95f00; --orange-2:#fff1e3; --night:#2b1d45;
   --paper:#fbfcff; --grid:rgba(60,100,190,.12); --card:#ffffff; --line:#d3dcef;
   --text:#1b2335; --muted:#5b6784; --ink:#1d3a8a; --ink-2:#e8eeff;
   --red:#cf3329; --red-2:#fdeceb; --green:#1f8754; --green-2:#e5f6ed; --gold:#e3a614;
@@ -28,11 +28,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#121826; --grid:rgba(140,170,240,.07); --card:#1b2334; --line:#2d3a55;
   --text:#e6ebf6; --muted:#9aa6c4; --ink:#a9c0ff; --ink-2:#22305a;
-  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); color-scheme:dark}}
+  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); --orange:#ff9d47; --orange-2:#3a2614; --night:#e9dcff; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#121826; --grid:rgba(140,170,240,.07); --card:#1b2334; --line:#2d3a55;
   --text:#e6ebf6; --muted:#9aa6c4; --ink:#a9c0ff; --ink-2:#22305a;
-  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); color-scheme:dark}
+  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); --orange:#ff9d47; --orange-2:#3a2614; --night:#e9dcff; color-scheme:dark}
 [hidden]{display:none!important}
 html,body{min-height:100%;margin:0}
 img{max-width:100%}
@@ -119,6 +119,15 @@ textarea{font:13px ui-monospace,Menlo,monospace;width:100%;box-sizing:border-box
 .ani .fr{font-family:var(--f-script);color:var(--ink);font-size:19px;line-height:1.7}
 body.print .ani .fr, body.print .newani .fw{font-family:var(--f-ui);font-weight:700;line-height:1.3}
 .ani.locked{background:transparent;border-style:dashed}
+.hwbanner{display:flex;align-items:center;gap:14px;background:var(--orange-2);border:2px solid var(--orange);border-radius:var(--r);padding:12px 16px}
+.hwbanner .em{font-size:44px;line-height:1}
+.hwbanner b{color:var(--orange)}
+.newhw{background:var(--orange-2);border-color:var(--orange)}
+.newhw .ask{color:var(--orange);font-weight:700}
+.newhw .fw{color:var(--night)}
+.hwalbum .ani:not(.locked){background:var(--orange-2);border-color:var(--orange)}
+.hwalbum .ani:not(.locked) .fr{color:var(--night)}
+.hwtitle{color:var(--orange)}
 .ani.locked .em{filter:grayscale(1) brightness(0);opacity:.18}
 .timer{font-variant-numeric:tabular-nums;min-width:118px}
 .timer.idle{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
@@ -215,7 +224,7 @@ const OBJ_M=['crayon','stylo','livre'], OBJ_F=['trousse','gomme','règle'], COL_
 
 /* ===== STATO ===== */
 const KEY='gloria-fr-v1';
-let S={units:[1,2,3],stats:{},history:[],script:true,slow:false,points:0,seen:0};
+let S={units:[1,2,3],stats:{},history:[],script:true,slow:false,points:0,seen:0,hw:0};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) S=Object.assign(S,s);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 let run=null, screen='home';
@@ -319,6 +328,13 @@ const ANI=[[30,'🐛','la chenille','il bruco'],[80,'🐌',"l'escargot",'la luma
  [320,'🐣','le poussin','il pulcino'],[440,'🐰','le lapin','il coniglio'],[580,'🦔','le hérisson','il riccio'],[740,'🐿️',"l'écureuil",'lo scoiattolo'],
  [920,'🦊','le renard','la volpe'],[1120,'🐼','le panda','il panda'],[1350,'🐨','le koala','il koala'],[1600,'🦁','le lion','il leone'],
  [1900,'🐬','le dauphin','il delfino'],[2250,'🦚','le paon','il pavone'],[2650,'🦄','la licorne',"l'unicorno"]];
+/* ===== HALLOWEEN: una sorpresa per ogni scheda fatta bene (almeno 70% giuste), dal 20 ottobre al 2 novembre ===== */
+const HW=[['🍬','le bonbon','la caramella'],['🎃','la citrouille','la zucca'],['🕷️',"l'araignée",'il ragno'],['🦇','la chauve-souris','il pipistrello'],
+ ['👻','le fantôme','il fantasma'],['🦉','le hibou','il gufo'],['🐈‍⬛','le chat noir','il gatto nero'],['🧙‍♀️','la sorcière','la strega']];
+function hwOn(){const d=new Date(),m=d.getMonth(),g=d.getDate();return (m===9&&g>=20)||(m===10&&g<=2)}
+function hwBanner(){const n=S.hw||0;
+  if(n>=HW.length) return `<div class="hwbanner"><span class="em">🎃</span><span>Hai trovato <b>tutte le 8 sorprese di Halloween</b>! Bravissima!</span></div>`;
+  return `<div class="hwbanner"><span class="em">🎃</span><span><b>Halloween!</b> Ogni scheda con almeno 6 giuste su 8 (o 9 su 12 nel test) regala una sorpresa. Trovate: <b>${n} / ${HW.length}</b></span></div>`;}
 function progHTML(){const pts=S.points||0,n=ANI.find(a=>a[0]>pts);
   if(!n) return '<div class="nextani"><span style="font-size:40px">🎉</span><b>Hai tutti gli animali della collezione!</b></div>';
   const prev=[...ANI].reverse().find(a=>a[0]<=pts),from=prev?prev[0]:0,pct=Math.max(3,Math.round(100*(pts-from)/(n[0]-from)));
@@ -343,7 +359,7 @@ function homeView(){
   return st+`<section style="display:grid;gap:10px"><h2>Unità da ripassare</h2><div class="units">
     ${[1,2,3].map(u=>`<button class="chip" data-unit="${u}" aria-pressed="${on(u)}">Unité ${u}</button>`).join('')}</div>
     <div class="note">Unité 1: saluti, s'appeler, numeri 1–10 · Unité 2: famiglia, animali, età · Unité 3: astuccio, colori, mon/ma</div></section>
-    <section style="display:grid;gap:10px"><h2>Prepararsi al test</h2><div class="cards">
+    ${hwOn()?hwBanner():''}<section style="display:grid;gap:10px"><h2>Prepararsi al test</h2><div class="cards">
     <button class="scheda testcard" data-start="test"><span class="ico">🏆</span><span class="fr">Test des unités 1 – 3</span><span class="it">12 domande: vocabolario, ascolto e scrittura · bonus fino a 50 punti</span></button></div>${progHTML()}</section>
     <section style="display:grid;gap:10px"><h2>Scegli la scheda</h2><div class="cards">
     ${['voc','eco','ecr'].map(k=>[k,NAMES[k]]).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr">${n[1]}</span><span class="it">${n[2]} · 8 domande</span></button>`).join('')}
@@ -383,6 +399,7 @@ function endView(){
   const wrong=run.qs.filter(q=>!q.res);
   const msg=isT?(p>=.9?'Pronta per il test ! 💪':p>=.7?'Presque ! Ripassa le parole qui sotto.':'Ripassiamo ancora un po\' insieme.'):(st===3?'Bravo Gloria !':st===2?'Très bien !':'Continue, Gloria !');
   return `<div class="panel" style="display:grid;gap:16px">
+   ${run.newHw?`<div class="newani newhw"><span class="ask">🎃 Sorpresa di Halloween!</span><span class="em">${run.newHw[0]}</span><span class="fw">${esc(run.newHw[1])}</span><span class="note">${esc(run.newHw[2])}</span><button class="btn ghost" data-ani="${esc(run.newHw[1])}">🔊 Ascolta</button></div>`:''}
    ${(run.newAni||[]).map(a=>`<div class="newani"><span class="ask">Nuovo animale nella tua collezione!</span><span class="em">${a[1]}</span><span class="fw">${esc(a[2])}</span><span class="note">${esc(a[3])}</span><button class="btn ghost" data-ani="${esc(a[2])}">🔊 Ascolta</button></div>`).join('')}
    <div class="stars" aria-label="${st} stelle">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div>
    <div class="score">${sc} / ${t}</div><div class="fw" style="text-align:center">${msg}</div>
@@ -394,6 +411,7 @@ function endView(){
 function albumView(){const pts=S.points||0;
   return `<div class="panel" style="display:grid;gap:16px"><div><h2>Ma collection</h2><div class="score" style="text-align:left">🐾 ${pts} punti</div></div>${progHTML()}
    <div class="album">${ANI.map(a=>a[0]<=pts?`<button class="ani" data-ani="${esc(a[2])}"><span class="em">${a[1]}</span><span class="fr">${esc(a[2])}</span><span class="note">${esc(a[3])}</span></button>`:`<div class="ani locked"><span class="em">${a[1]}</span><span class="fr">?</span><span class="note">a ${a[0]} punti</span></div>`).join('')}</div>
+   ${hwOn()||S.hw?`<div style="display:grid;gap:10px"><h2 class="hwtitle">🎃 Halloween · ${S.hw||0} / ${HW.length}</h2><div class="album hwalbum">${HW.map((a,i)=>i<(S.hw||0)?`<button class="ani" data-ani="${esc(a[1])}"><span class="em">${a[0]}</span><span class="fr">${esc(a[1])}</span><span class="note">${esc(a[2])}</span></button>`:`<div class="ani locked"><span class="em">${a[0]}</span><span class="fr">?</span><span class="note">sorpresa n. ${i+1}</span></div>`).join('')}</div></div>`:''}
    <p class="note">Ogni risposta giusta vale 10 punti · 3 giuste di fila: +5 · scheda tutta giusta: +20 · test: bonus fino a +50. Tocca un animale per sentire il nome in francese.</p></div>`;
 }
 function progView(){
@@ -403,7 +421,7 @@ function progView(){
    <div><h2>Ultime schede</h2>${hist.length?`<div style="overflow-x:auto"><table><tr><th>Data</th><th>Scheda</th><th>Giuste</th><th>Punti</th></tr>${hist.map(h=>`<tr><td>${esc(h.d)}</td><td>${NAMES[h.k][2]}</td><td>${h.s}/${h.t}</td><td>${h.p!=null?'+'+h.p:''}</td></tr>`).join('')}</table></div>`:'<p class="note">Nessuna scheda ancora: inizia dal menu!</p>'}</div>
    <div><h2>Parole su cui sbaglia di più</h2>${st.length?`<div style="overflow-x:auto"><table><tr><th>Parola</th><th>Giuste</th><th>Sbagliate</th></tr>${st.map(x=>`<tr><td>${esc(x.k)}</td><td>${x.ok}</td><td>${x.ko}</td></tr>`).join('')}</table></div>`:'<p class="note">Ancora nessun errore registrato.</p>'}</div>
    <div style="display:grid;gap:8px"><h2>Salva / ripristina (JSON)</h2><p class="note">I progressi restano su questo tablet. Per un backup scarica il file (o copia il testo); per ripristinare scegli il file o incolla il testo qui sotto.</p>
-   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0}))}</textarea>
+   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0,hw:S.hw||0}))}</textarea>
    <div class="row"><button class="btn" id="b-dl">Scarica backup</button><button class="btn ghost" id="b-copy">Copia</button><span class="note" id="copymsg"></span></div>
    <textarea id="imp" placeholder="Incolla qui un backup JSON…"></textarea>
    <div class="row"><input type="file" id="file" accept=".json,application/json"><button class="btn" id="b-imp">Importa</button></div><span class="note" id="impmsg"></span>
@@ -424,7 +442,8 @@ function record(q,ok){const s=S.stats[q.key]||(S.stats[q.key]={ok:0,ko:0}); ok?s
 function finish(){const sc=run.qs.filter(q=>q.res).length,p=sc/run.qs.length;
   run.bonus=run.kind==='test'?(p===1?50:p>=.8?30:p>=.6?10:0):(p===1?20:0);
   S.points=(S.points||0)+run.bonus; run.earned+=run.bonus; S.history[S.history.length-1].p=run.earned;
-  const n=ANI.filter(a=>a[0]<=S.points).length; run.newAni=ANI.slice(S.seen||0,n); S.seen=Math.max(S.seen||0,n);}
+  const n=ANI.filter(a=>a[0]<=S.points).length; run.newAni=ANI.slice(S.seen||0,n); S.seen=Math.max(S.seen||0,n);
+  run.newHw=null; if(hwOn()&&p>=.7&&(S.hw||0)<HW.length){run.newHw=HW[S.hw||0]; S.hw=(S.hw||0)+1;}}
 function answerMC(i){
   const q=run.qs[run.i]; if(run.done) return; run.choice=i; run.done=true; record(q,i===q.a); render();
   if(q.sayAfter) say1(q.sayAfter);
@@ -443,12 +462,12 @@ function check(){
 function next(){
   try{speechSynthesis.cancel()}catch(e){}
   if(run.i+1<run.qs.length){run.i++;run.done=false;run.typed='';run.note='';render();autoSay();if(run.qs[run.i].type==='tx')setTimeout(()=>{const i=$('#in');i&&i.focus()},50)}
-  else{const d=new Date();S.history.push({d:d.toLocaleDateString('it-CH')+' '+d.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'}),k:run.kind,s:run.qs.filter(q=>q.res).length,t:run.qs.length});finish();save();screen='end';render();if(run.newAni.length)setTimeout(()=>speak(run.newAni.map(a=>[a[2],'c'])),500)}
+  else{const d=new Date();S.history.push({d:d.toLocaleDateString('it-CH')+' '+d.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'}),k:run.kind,s:run.qs.filter(q=>q.res).length,t:run.qs.length});finish();save();screen='end';render();const nm=[...(run.newHw?[[run.newHw[1],'c']]:[]),...run.newAni.map(a=>[a[2],'c'])]; if(nm.length)setTimeout(()=>speak(nm),500)}
 }
 function alertBox(msg){const w=document.createElement('div');w.className='warn';w.textContent=msg;$('#app').appendChild(w);setTimeout(()=>w.remove(),3500)}
 function doImport(txt){
   try{const o=JSON.parse(txt); if(typeof o!=='object'||!o) throw 0;
-    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(typeof o.points==='number')S.points=o.points; if(typeof o.seen==='number')S.seen=o.seen;
+    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(typeof o.points==='number')S.points=o.points; if(typeof o.seen==='number')S.seen=o.seen; if(typeof o.hw==='number')S.hw=o.hw;
     save(); render(); $('#impmsg').textContent='Backup importato ✔';
   }catch(e){$('#impmsg').textContent='Il testo non è un backup valido: incolla tutto il JSON copiato prima.'}
 }
@@ -473,7 +492,7 @@ function bind(){
   const dl=$('#b-dl'); if(dl) dl.onclick=()=>{try{const b=new Blob([$('#exp').value],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup-francais-gloria-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();$('#copymsg').textContent='Backup scaricato ✔'}catch(e){$('#copymsg').textContent='Download non riuscito: usa Copia.'}};
   const bi=$('#b-imp'); if(bi) bi.onclick=()=>doImport($('#imp').value);
   const fi=$('#file'); if(fi) fi.onchange=()=>{const r=new FileReader();r.onload=()=>doImport(r.result);if(fi.files[0])r.readAsText(fi.files[0])};
-  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.history=[];S.points=0;S.seen=0;save();resetArm=false;render()};
+  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.history=[];S.points=0;S.seen=0;S.hw=0;save();resetArm=false;render()};
 }
 /* ===== TIMER: 15 minuti al giorno ===== */
 const LIMIT=15*60*1000;
