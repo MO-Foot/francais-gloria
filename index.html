@@ -237,7 +237,17 @@ const OBJ_M=['crayon','stylo','livre'], OBJ_F=['trousse','gomme','règle'], COL_
 const KEY='gloria-fr-v1';
 let S={units:[1,2,3],stats:{},history:[],script:true,slow:false,points:0,seen:0,hw:0};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) S=Object.assign(S,s);}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function localSave(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){localSave(); markDirty();}
+let DEV=null; try{DEV=localStorage.getItem('gloria-fr-dev')}catch(e){}
+if(!DEV){DEV='d'+Math.random().toString(36).slice(2,10); try{localStorage.setItem('gloria-fr-dev',DEV)}catch(e){}}
+/* punti e sorprese tenuti per dispositivo: così unendo due dispositivi non si perde e non si raddoppia nulla */
+if(!S.byDev){S.byDev={}; if(S.points) S.byDev[DEV]=S.points;}
+if(!S.hwBy){S.hwBy={}; if(S.hw) S.hwBy[DEV]=S.hw;}
+function recalc(){S.points=Object.values(S.byDev).reduce((a,b)=>a+(+b||0),0); S.hw=Math.min(8,Object.values(S.hwBy).reduce((a,b)=>a+(+b||0),0));}
+function addPts(n){if(!n)return; S.byDev[DEV]=(S.byDev[DEV]||0)+n; recalc();}
+function addHw(){S.hwBy[DEV]=(S.hwBy[DEV]||0)+1; recalc();}
+recalc();
 let run=null, screen='home';
 
 /* ===== UTILI ===== */
@@ -452,7 +462,7 @@ function homeView(){
     <button class="scheda" data-start="carta"><span class="ico">✏️</span><span class="fr">Sur la feuille</span><span class="it">5 risposte da scrivere a mano e fotografare</span></button></div>${progHTML()}</section>
     <section style="display:grid;gap:10px"><h2>Scegli la scheda</h2><div class="cards">
     ${['voc','eco','ecr'].map(k=>[k,NAMES[k]]).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr">${n[1]}</span><span class="it">${n[2]} · 8 domande</span></button>`).join('')}
-    </div></section>${noVoice}`;
+    </div></section>${noVoice}<p class="note" id="cloudline">${cloudLine()}</p>`;
 }
 function quizView(){
   const q=run.qs[run.i];
@@ -509,10 +519,11 @@ function progView(){
   const st=Object.entries(S.stats).map(([k,v])=>({k,...v})).filter(x=>x.ko>0).sort((a,b)=>(b.ko-b.ok/2)-(a.ko-a.ok/2)).slice(0,10);
   const hist=S.history.slice(-10).reverse();
   return `<div class="panel" style="display:grid;gap:18px">
+   <div style="display:grid;gap:8px"><h2>Salvataggio online</h2><div id="cloudbox" style="display:grid;gap:8px">${cloudHTML()}</div></div>
    <div><h2>Ultime schede</h2>${hist.length?`<div style="overflow-x:auto"><table><tr><th>Data</th><th>Scheda</th><th>Giuste</th><th>Punti</th></tr>${hist.map(h=>`<tr><td>${esc(h.d)}</td><td>${NAMES[h.k][2]}</td><td>${h.s}/${h.t}</td><td>${h.p!=null?'+'+h.p:''}</td></tr>`).join('')}</table></div>`:'<p class="note">Nessuna scheda ancora: inizia dal menu!</p>'}</div>
    <div><h2>Parole su cui sbaglia di più</h2>${st.length?`<div style="overflow-x:auto"><table><tr><th>Parola</th><th>Giuste</th><th>Sbagliate</th></tr>${st.map(x=>`<tr><td>${esc(x.k)}</td><td>${x.ok}</td><td>${x.ko}</td></tr>`).join('')}</table></div>`:'<p class="note">Ancora nessun errore registrato.</p>'}</div>
    <div style="display:grid;gap:8px"><h2>Salva / ripristina (JSON)</h2><p class="note">I progressi restano su questo tablet. Per un backup scarica il file (o copia il testo); per ripristinare scegli il file o incolla il testo qui sotto.</p>
-   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0,hw:S.hw||0}))}</textarea>
+   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0,hw:S.hw||0,byDev:S.byDev,hwBy:S.hwBy}))}</textarea>
    <div class="row"><button class="btn" id="b-dl">Scarica backup</button><button class="btn ghost" id="b-copy">Copia</button><span class="note" id="copymsg"></span></div>
    <textarea id="imp" placeholder="Incolla qui un backup JSON…"></textarea>
    <div class="row"><input type="file" id="file" accept=".json,application/json"><button class="btn" id="b-imp">Importa</button></div><span class="note" id="impmsg"></span>
@@ -531,13 +542,13 @@ function start(kind){
 }
 function autoSay(){const q=run.qs[run.i]; if(q.listen) speak(q.listen)}
 function record(q,ok,base=10){const s=S.stats[q.key]||(S.stats[q.key]={ok:0,ko:0}); ok?s.ok++:s.ko++; q.res=ok;
-  if(ok){run.streak++; q.bonus=run.streak%3===0; q.pts=base+(q.bonus?5:0); S.points=(S.points||0)+q.pts; run.earned+=q.pts;} else run.streak=0;
+  if(ok){run.streak++; q.bonus=run.streak%3===0; q.pts=base+(q.bonus?5:0); addPts(q.pts); run.earned+=q.pts;} else run.streak=0;
   save()}
 function finish(){const sc=run.qs.filter(q=>q.res).length,p=sc/run.qs.length;
   run.bonus=(run.kind==='test'||run.kind==='f2')?(p===1?50:p>=.8?30:p>=.6?10:0):(p===1?20:0);
-  S.points=(S.points||0)+run.bonus; run.earned+=run.bonus; S.history[S.history.length-1].p=run.earned;
+  addPts(run.bonus); run.earned+=run.bonus; S.history[S.history.length-1].p=run.earned;
   const n=ANI.filter(a=>a[0]<=S.points).length; run.newAni=ANI.slice(S.seen||0,n); S.seen=Math.max(S.seen||0,n);
-  run.newHw=null; if(hwOn()&&p>=.7&&(S.hw||0)<HW.length){run.newHw=HW[S.hw||0]; S.hw=(S.hw||0)+1;}}
+  run.newHw=null; if(hwOn()&&p>=.7&&(S.hw||0)<HW.length){run.newHw=HW[S.hw||0]; addHw();}}
 function answerMC(i){
   const q=run.qs[run.i]; if(run.done) return; run.choice=i; run.done=true; record(q,i===q.a); render();
   if(q.sayAfter) say1(q.sayAfter);
@@ -556,12 +567,12 @@ function check(){
 function next(){
   try{speechSynthesis.cancel()}catch(e){}
   if(run.i+1<run.qs.length){if(run.ph&&run.ph.url)URL.revokeObjectURL(run.ph.url);run.ph=null;run.i++;run.done=false;run.typed='';run.note='';render();autoSay();if(run.qs[run.i].type==='tx')setTimeout(()=>{const i=$('#in');i&&i.focus()},50)}
-  else{const d=new Date();S.history.push({d:d.toLocaleDateString('it-CH')+' '+d.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'}),k:run.kind,s:run.qs.filter(q=>q.res).length,t:run.qs.length});finish();save();screen='end';render();const nm=[...(run.newHw?[[run.newHw[1],'c']]:[]),...run.newAni.map(a=>[a[2],'c'])]; if(nm.length)setTimeout(()=>speak(nm),500)}
+  else{const d=new Date();S.history.push({d:d.toLocaleDateString('it-CH')+' '+d.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'}),k:run.kind,s:run.qs.filter(q=>q.res).length,t:run.qs.length});finish();save();cloudSync();screen='end';render();const nm=[...(run.newHw?[[run.newHw[1],'c']]:[]),...run.newAni.map(a=>[a[2],'c'])]; if(nm.length)setTimeout(()=>speak(nm),500)}
 }
 function alertBox(msg){const w=document.createElement('div');w.className='warn';w.textContent=msg;$('#app').appendChild(w);setTimeout(()=>w.remove(),3500)}
 function doImport(txt){
   try{const o=JSON.parse(txt); if(typeof o!=='object'||!o) throw 0;
-    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(typeof o.points==='number')S.points=o.points; if(typeof o.seen==='number')S.seen=o.seen; if(typeof o.hw==='number')S.hw=o.hw;
+    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(o.byDev&&typeof o.byDev==='object')S.byDev=o.byDev; else if(typeof o.points==='number')S.byDev={[DEV]:o.points}; if(o.hwBy&&typeof o.hwBy==='object')S.hwBy=o.hwBy; else if(typeof o.hw==='number')S.hwBy={[DEV]:o.hw}; if(typeof o.seen==='number')S.seen=o.seen; recalc();
     save(); render(); $('#impmsg').textContent='Backup importato ✔';
   }catch(e){$('#impmsg').textContent='Il testo non è un backup valido: incolla tutto il JSON copiato prima.'}
 }
@@ -571,6 +582,7 @@ function bind(){
   document.querySelectorAll('[data-unit]').forEach(b=>b.onclick=()=>{const u=+b.dataset.unit; if(on(u)){if(S.units.length>1)S.units=S.units.filter(x=>x!==u)}else S.units=[...S.units,u].sort(); save(); render()});
   document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>answerMC(+b.dataset.opt));
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const i=$('#in'),s=i.selectionStart??i.value.length,e=i.selectionEnd??s;i.value=i.value.slice(0,s)+b.dataset.k+i.value.slice(e);i.focus();i.setSelectionRange(s+1,s+1)});
+  bindCloud();
   const cam=$('#cam'); if(cam) cam.onchange=()=>onPhoto(cam.files&&cam.files[0]);
   const ss=$('#b-showsol'); if(ss) ss.onclick=()=>phDone(false);
   const sok=$('#b-selfok'); if(sok) sok.onclick=()=>phDone(true);
@@ -592,7 +604,7 @@ function bind(){
   const dl=$('#b-dl'); if(dl) dl.onclick=()=>{try{const b=new Blob([$('#exp').value],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup-francais-gloria-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();$('#copymsg').textContent='Backup scaricato ✔'}catch(e){$('#copymsg').textContent='Download non riuscito: usa Copia.'}};
   const bi=$('#b-imp'); if(bi) bi.onclick=()=>doImport($('#imp').value);
   const fi=$('#file'); if(fi) fi.onchange=()=>{const r=new FileReader();r.onload=()=>doImport(r.result);if(fi.files[0])r.readAsText(fi.files[0])};
-  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.history=[];S.points=0;S.seen=0;S.hw=0;save();resetArm=false;render()};
+  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.history=[];S.byDev={};S.hwBy={};S.points=0;S.seen=0;S.hw=0;localSave();cloudReset();resetArm=false;render()};
 }
 /* ===== TIMER: 15 minuti al giorno ===== */
 const LIMIT=15*60*1000;
@@ -624,8 +636,61 @@ function showLock(){try{speechSynthesis.cancel()}catch(e){}
 })();
 setInterval(tick,1000);
 document.addEventListener('visibilitychange',()=>{lastTick=null;if(!document.hidden&&T().run)lastTick=Date.now()});
+/* ===== SALVATAGGIO ONLINE (Firebase) ===== */
+const FBCFG={apiKey:"AIzaSyDVRjY_7fHfxmMnolhqnxzMN58xVVQ5ass",authDomain:"francais-gloria.firebaseapp.com",projectId:"francais-gloria",storageBucket:"francais-gloria.firebasestorage.app",messagingSenderId:"534405393040",appId:"1:534405393040:web:ffab17474ca4649354c615"};
+const FBV='10.12.2';
+let FB={state:'loading',user:null,last:null,err:''},fdb=null,fauth=null,dirty=false,pushT=null,syncing=null;
+function loadScript(src){return new Promise((res,rej)=>{const e=document.createElement('script');e.src=src;e.onload=res;e.onerror=rej;document.head.appendChild(e)})}
+async function initCloud(){
+  try{for(const m of ['app','auth','firestore']) await loadScript(`https://www.gstatic.com/firebasejs/${FBV}/firebase-${m}-compat.js`);
+    firebase.initializeApp(FBCFG); fauth=firebase.auth(); fdb=firebase.firestore();
+    fauth.onAuthStateChanged(async u=>{FB.user=u; FB.state=u?'on':'off'; cloudUI(); if(u) await cloudSync();});
+  }catch(e){FB.state='na'; cloudUI();}
+}
+function markDirty(){dirty=true; if(!pushT&&FB.user) pushT=setTimeout(()=>{pushT=null; if(dirty) cloudSync();},20000);}
+function cloudPayload(){return {byDev:S.byDev,hwBy:S.hwBy,seen:S.seen||0,stats:S.stats,history:S.history.slice(-300),t:S.t||null,units:S.units}}
+const hOrd=h=>{const m=String(h.d).match(/(\d+)\.(\d+)\.(\d+)\D+(\d+):(\d+)/);return m?+(m[3]+m[2].padStart(2,'0')+m[1].padStart(2,'0')+m[4].padStart(2,'0')+m[5]):0};
+function mergeInto(r){if(!r||typeof r!=='object') return;
+  const mx=(a,b)=>{const o={...a};for(const k in (b||{})) o[k]=Math.max(+o[k]||0,+b[k]||0);return o};
+  S.byDev=mx(S.byDev,r.byDev); S.hwBy=mx(S.hwBy,r.hwBy); S.seen=Math.max(S.seen||0,+r.seen||0);
+  for(const k in (r.stats||{})){const a=S.stats[k]||{ok:0,ko:0},b=r.stats[k]||{};S.stats[k]={ok:Math.max(a.ok,+b.ok||0),ko:Math.max(a.ko,+b.ko||0)}}
+  const have=new Set(S.history.map(h=>[h.d,h.k,h.s,h.t].join('|')));
+  (r.history||[]).forEach(h=>{const k=[h.d,h.k,h.s,h.t].join('|'); if(!have.has(k)){have.add(k);S.history.push(h)}});
+  S.history.sort((a,b)=>hOrd(a)-hOrd(b));
+  if(r.t&&r.t.day===today()){const t=T(); t.used=Math.max(t.used||0,+r.t.used||0); t.extra=Math.max(t.extra||0,+r.t.extra||0);}
+  recalc();}
+async function cloudSync(){if(!fdb||!FB.user) return; if(syncing) return syncing;
+  const ref=fdb.collection('progress').doc(FB.user.uid);
+  syncing=(async()=>{try{
+    await fdb.runTransaction(async tx=>{const d=await tx.get(ref); if(d.exists){try{mergeInto(JSON.parse(d.data().data))}catch(e){}}
+      tx.set(ref,{data:JSON.stringify(cloudPayload()),updated:firebase.firestore.FieldValue.serverTimestamp(),device:DEV});});
+    dirty=false; FB.last=new Date(); FB.err=''; localSave();
+  }catch(e){FB.err=e&&e.code==='permission-denied'?'Permesso negato: controlla le regole di Firestore.':e&&e.code==='unavailable'?'Senza internet: salvo appena torna la connessione.':'Salvataggio online non riuscito, riprovo più tardi.';}
+  syncing=null; cloudUI(); if(screen!=='quiz') render(); updTimer();})();
+  return syncing;}
+async function cloudReset(){if(!fdb||!FB.user) return; try{await fdb.collection('progress').doc(FB.user.uid).set({data:JSON.stringify(cloudPayload()),updated:firebase.firestore.FieldValue.serverTimestamp(),device:DEV}); FB.last=new Date();}catch(e){} cloudUI();}
+function cloudLine(){return FB.state==='on'?'☁️ Progressi salvati online: li ritrovi su ogni dispositivo.':FB.state==='off'?'☁️ Salvataggio online non attivo: papà o mamma accedono in 📊 Progressi.':''}
+function authErr(c){return /invalid-credential|wrong-password|user-not-found|invalid-email|invalid-login/.test(c||'')?'Email o password sbagliate.':/network/.test(c||'')?'Nessuna connessione a internet.':/too-many/.test(c||'')?'Troppi tentativi: riprova tra qualche minuto.':/unauthorized-domain/.test(c||'')?'Dominio non autorizzato: aggiungi mo-foot.github.io in Firebase.':'Accesso non riuscito ('+(c||'errore')+').'}
+function cloudHTML(){
+  if(FB.state==='loading') return '<p class="note">Collegamento al salvataggio online…</p>';
+  if(FB.state==='na') return '<p class="note">Salvataggio online non disponibile qui: serve internet e la versione dell\'app su mo-foot.github.io.</p>';
+  if(FB.user) return `<p class="note">✓ Collegato come <b>${esc(FB.user.email||'')}</b>. Punti, animali e statistiche si salvano online.${FB.last?' Ultimo salvataggio: '+FB.last.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'})+'.':''}${FB.err?' <b>'+esc(FB.err)+'</b>':''}</p>
+    <div class="row"><button class="btn ghost" id="b-logout">Esci</button><button class="btn" id="b-sync">Sincronizza ora</button></div>`;
+  return `<p class="note">Accedi con l'account di famiglia per salvare i progressi online e ritrovarli su ogni dispositivo.</p>
+    <input type="email" id="fb-mail" class="keyin" placeholder="Email" autocomplete="username" autocapitalize="off">
+    <input type="password" id="fb-pw" class="keyin" placeholder="Password" autocomplete="current-password">
+    <div class="row"><span class="note" id="fb-msg">${esc(FB.err)}</span><button class="btn" id="b-login">Accedi</button></div>`;}
+function cloudUI(){const b=$('#cloudbox'); if(b&&!(b.contains(document.activeElement)&&document.activeElement.tagName==='INPUT')){b.innerHTML=cloudHTML(); bindCloud();} const l=$('#cloudline'); if(l) l.textContent=cloudLine();}
+function bindCloud(){
+  const li=$('#b-login'); if(li){const go=async()=>{const m=$('#fb-mail').value.trim(),pw=$('#fb-pw').value; if(!m||!pw) return; li.disabled=true; $('#fb-msg').textContent='Accesso…';
+      try{FB.err=''; await fauth.signInWithEmailAndPassword(m,pw);}catch(e){FB.err=authErr(e&&e.code); const x=$('#fb-msg'); if(x) x.textContent=FB.err; li.disabled=false;}};
+    li.onclick=go; const pw=$('#fb-pw'); if(pw) pw.onkeydown=e=>{if(e.key==='Enter')go()};}
+  const lo=$('#b-logout'); if(lo) lo.onclick=async()=>{await cloudSync(); await fauth.signOut();};
+  const sy=$('#b-sync'); if(sy) sy.onclick=()=>cloudSync();}
+document.addEventListener('visibilitychange',()=>{if(!FB.user) return; if(document.hidden){if(dirty) cloudSync();} else cloudSync();});
 render();
 if(T().used>0&&left()<=0) showLock();
+initCloud();
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(e=>console.warn("Service Worker non registrato:",e.message))})}
 </script>
 </body>

@@ -11,7 +11,7 @@
  * cache in background a ogni apertura online, ma cambiare il numero
  * forza un aggiornamento più deciso e pulito).
  */
-const CACHE_NAME = "francais-gloria-v5";
+const CACHE_NAME = "francais-gloria-v6";
 
 // Percorsi relativi alla cartella dove si trova QUESTO file (sw.js) —
 // deve stare nella stessa cartella di index.html.
@@ -26,6 +26,9 @@ const APP_SHELL = [
 // Risorse esterne (CDN) usate dall'app, cache "best effort": se non
 // sono raggiungibili durante l'installazione non blocchiamo tutto.
 const RISORSE_ESTERNE = [
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js",
   "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Playwrite+FR+Moderne:wght@300;400&display=swap",
 ];
 
