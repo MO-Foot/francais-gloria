@@ -128,6 +128,17 @@ body.print .ani .fr, body.print .newani .fw{font-family:var(--f-ui);font-weight:
 .hwalbum .ani:not(.locked){background:var(--orange-2);border-color:var(--orange)}
 .hwalbum .ani:not(.locked) .fr{color:var(--night)}
 .hwtitle{color:var(--orange)}
+.cards.two{grid-template-columns:1fr 1fr}
+@media (max-width:620px){.cards.two{grid-template-columns:1fr}}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.camlbl{position:relative;cursor:pointer}
+.camlbl:focus-within{outline:3px solid var(--gold);outline-offset:2px}
+.phbox{display:grid;gap:12px}
+.phimg{max-width:100%;max-height:320px;justify-self:center;border-radius:12px;border:1.5px solid var(--line)}
+.checking{text-align:center;font-weight:700;color:var(--ink);padding:10px}
+.fb.mid{background:var(--orange-2);border:1.5px solid var(--orange)}
+.fb.mid .t{color:var(--orange)}
+.keyin{font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);width:100%;box-sizing:border-box}
 .ani.locked .em{filter:grayscale(1) brightness(0);opacity:.18}
 .timer{font-variant-numeric:tabular-nums;min-width:118px}
 .timer.idle{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:700}
@@ -294,7 +305,7 @@ function gen(kind){
       const t=pick(combos); const near=sh(combos.filter(x=>x!==t&&(x[0]===t[0]||x[1]===t[1]))).slice(0,3); const o=sh([t,...near]);
       const txt=art(byFr(t[0]))+' '+t[1];
       return mcq({key:txt,listen:[[txt,'f']],ask:'Ascolta: quale oggetto e di che colore?',opts:o.map(x=>objPic(x[0],x[1])),a:o.indexOf(t),reveal:txt})}]);
-    const D=DLG.filter(d=>d.u.every(on)); if(D.length) pools.push([4,()=>{const d=pick(D),q=pick(d.q);
+    const D=DLG.filter(d=>d.u.some(on)&&d.u.every(u=>u<=Math.max(...S.units))); if(D.length) pools.push([4,()=>{const d=pick(D),q=pick(d.q);
       const opts=q.obj?q.o.map(x=>objPic(x[0],x[1])):q.o.map(x=>q.pic?`<span class="em">${x}</span>`:`<span style="font-size:22px;font-weight:700">${esc(x)}</span>`);
       return mcq({key:'dialogo: '+d.l[0][0],listen:d.l.map(x=>[x[2],x[1]]),ask:q.q,opts,a:q.a,transcript:d.l,nw:d.nw})}]);
   }
@@ -322,7 +333,7 @@ function build(kind,n=8){
 }
 
 /* ===== SCHERMATE ===== */
-const NAMES={voc:['📚','Vocabulaire','Vocabolario'],eco:['🎧','Écoute','Ascolto'],ecr:['✍️','Écriture','Scrittura'],test:['🏆','Test','Test unità 1–3']};
+const NAMES={voc:['📚','Vocabulaire','Vocabolario'],eco:['🎧','Écoute','Ascolto'],ecr:['✍️','Écriture','Scrittura'],test:['🏆','Test','Test unità 1–3'],f2:['🎯','Unité 2','Focus unità 2'],carta:['✏️','Sur la feuille','Sul foglio']};
 /* ===== PREMI: animali sempre più belli (punti necessari, emoji, francese, italiano) ===== */
 const ANI=[[30,'🐛','la chenille','il bruco'],[80,'🐌',"l'escargot",'la lumaca'],[140,'🐞','la coccinelle','la coccinella'],[220,'🦋','le papillon','la farfalla'],
  [320,'🐣','le poussin','il pulcino'],[440,'🐰','le lapin','il coniglio'],[580,'🦔','le hérisson','il riccio'],[740,'🐿️',"l'écureuil",'lo scoiattolo'],
@@ -339,6 +350,82 @@ function progHTML(){const pts=S.points||0,n=ANI.find(a=>a[0]>pts);
   if(!n) return '<div class="nextani"><span style="font-size:40px">🎉</span><b>Hai tutti gli animali della collezione!</b></div>';
   const prev=[...ANI].reverse().find(a=>a[0]<=pts),from=prev?prev[0]:0,pct=Math.max(3,Math.round(100*(pts-from)/(n[0]-from)));
   return `<div class="nextani"><span class="em">${n[1]}</span><div style="flex:1;display:grid;gap:6px;min-width:0"><span>Prossimo animale: ancora <b>${n[0]-pts}</b> punti</span><div class="bar"><i style="width:${pct}%"></i></div></div></div>`;}
+/* ===== SUL FOGLIO: Gloria scrive a mano, fotografa, Claude controlla ===== */
+const PAPER=[
+ {t:'w',e:'🐶',it:'il cane',a:['le chien']},{t:'w',e:'🐢',it:'la tartaruga',a:['la tortue']},
+ {t:'w',e:'🦜',it:'il pappagallino',a:['la perruche']},{t:'w',e:'🐹',it:'il criceto',a:['le hamster']},
+ {t:'w',e:'🐠',it:'il pesce rosso',a:['le poisson rouge']},{t:'w',e:'👧',it:'la sorella',a:['la sœur']},
+ {t:'w',e:'👦',it:'il fratello',a:['le frère']},{t:'w',e:'🐱',it:'il gatto',a:['le chat']},
+ {t:'f',e:'👦👦',it:'Ho due fratelli.',a:["J'ai deux frères."]},
+ {t:'f',e:'🙅',it:'Non ho fratelli.',a:["Je n'ai pas de frère."]},
+ {t:'f',e:'👧',it:'Ho una sorella.',a:["J'ai une sœur."]},
+ {t:'f',e:'💬',it:'Si chiama Giulia.',a:["Elle s'appelle Giulia."]},
+ {t:'f',e:'❓',it:'Come ti chiami?',a:["Comment tu t'appelles ?"]},
+ {t:'f',e:'🎂',it:'Quanti anni hai?',a:['Tu as quel âge ?']},
+ {t:'f',e:'🎂',it:'Rispondi: Tu as quel âge ?',q:'Tu as quel âge ?',a:["J'ai huit ans."]}
+];
+function buildCarta(){const W=sh(PAPER.filter(p=>p.t==='w')).slice(0,2),F=sh(PAPER.filter(p=>p.t==='f')).slice(0,3);
+  return [...W,...F].map(p=>({type:'ph',key:p.a[0],sec:'Sur la feuille',ask:'Scrivi sul foglio, poi fai la foto',ans:p.a,
+    body:`<span class="big">${p.e}</span><span class="bubble">${p.t==='w'?'In francese, con <b>le</b> o <b>la</b>: ':p.q?'':'In francese: '}<b>${esc(p.it)}</b></span>`,
+    task:p.t==='w'?`scrivere in francese, con l'articolo le/la, la parola "${p.it}"`:p.q?`rispondere in francese alla domanda "${p.q}" (ha 8 anni)`:`tradurre in francese la frase "${p.it}"`}));}
+function buildFocus2(){const keep=S.units;S.units=[2];const qs=[];
+  [['voc','Vocabulaire',3],['eco','Écoute',3],['ecr','Écriture',2]].forEach(([k,sec,n])=>build(k,n).forEach(q=>{q.sec='Unité 2 · '+sec;qs.push(q)}));
+  S.units=keep; buildCarta().filter((q,i)=>i===0||i===2).forEach(q=>{q.sec='Unité 2 · Sur la feuille';qs.push(q)}); return qs;}
+let SAMPLE=null;
+try{ if(window.claude&&window.claude.use) window.claude.use('sample').then(async sm=>{ if(!sm) return; const l=await sm.limits().catch(()=>null); if(l&&l.images) SAMPLE=sm; }).catch(()=>{}); }catch(e){}
+const getKey=()=>{try{return localStorage.getItem('gloria-fr-key')||''}catch(e){return ''}};
+const checker=()=>SAMPLE?'sample':getKey()?'api':null;
+function aiModeText(){return SAMPLE?'Attiva: le foto vengono controllate da Claude con il tuo account.':getKey()?'Attiva: le foto vengono controllate da Claude con la chiave salvata su questo tablet.':'Non attiva: dopo la foto Gloria confronta da sola la sua scrittura con la soluzione. Per la correzione automatica nella versione GitHub incolla qui una chiave API Anthropic (da console.anthropic.com, con un limite di spesa basso). Resta solo su questo tablet e non entra nel backup.'}
+function checkPrompt(q){return `Sei una maestra di francese gentile. Nella foto c'è la scrittura a mano (spesso in corsivo, a volte con penna e matita) di Gloria, una bambina di 8 anni della Svizzera italiana al primo anno di francese, su un foglio a quadretti.
+Il suo compito era: ${q.task}.
+Risposta attesa: ${q.ans.join(' oppure ')}
+Leggi solo ciò che ha scritto per questo compito (ignora altre righe o disegni) e confrontalo con la risposta attesa.
+- "giusto": parole e ortografia corrette. Ignora maiuscole/minuscole, punto finale, spazio prima del "?" e piccole imperfezioni del corsivo. "oe" al posto di "œ" va bene. L'apostrofo deve esserci.
+- "quasi": c'è un solo piccolo errore: un accento mancante o sbagliato, una lettera sbagliata o mancante, la "s" del plurale, l'articolo le/la sbagliato, l'apostrofo mancante.
+- "sbagliato": due o più errori, oppure parole diverse.
+- "illeggibile": foto sfocata, foglio vuoto o scrittura che non riesci a leggere.
+Rispondi solo con questo JSON:
+{"letto":"ciò che leggi, lettera per lettera","esito":"giusto|quasi|sbagliato|illeggibile","indizio":"se non è giusto: un indizio breve in italiano semplice per una bambina di 8 anni, che le dica DOVE guardare senza scrivere la soluzione (es. 'Guarda bene la fine della parola: è al plurale!'); se giusto stringa vuota","complimento":"se giusto: un complimento breve, es. 'Très bien, Gloria !'; altrimenti stringa vuota"}`;}
+function shrink(file){return new Promise(res=>{const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{const k=Math.min(1,1400/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>res(b||file),'image/jpeg',.85)};
+  img.onerror=()=>{URL.revokeObjectURL(u);res(file)};img.src=u;})}
+const blobB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
+async function aiCheck(q,blob,mode){const prompt=checkPrompt(q);
+  if(mode==='sample') return await SAMPLE.json(prompt,{images:[blob],cache:false});
+  const data=await blobB64(blob);
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:600,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:prompt}]}]})});
+  if(r.status===401||r.status===403) throw {code:'badkey'};
+  if(r.status===429) throw {code:'rate_limited'};
+  if(!r.ok) throw {code:'http'};
+  const j=await r.json(),t=(j.content||[]).map(c=>c.text||'').join(''),m=t.match(/\{[\s\S]*\}/);
+  return m?JSON.parse(m[0]):null;}
+function errMsg(e){const c=e&&e.code;
+  return c==='rate_limited'?'Troppe foto di fila: per questa usa la soluzione.':c==='badkey'?'La chiave per la correzione non funziona (papà controlla in Progressi).':c==='not_granted'||c==='sampling_disabled'?'La correzione automatica non è permessa.':'Non riesco a controllare la foto adesso.'}
+function phView(q){const P=run.ph||{};let h='<div class="phbox">';
+  if(P.url) h+=`<img class="phimg" src="${P.url}" alt="La foto del foglio di Gloria">`;
+  if(run.done) return h+'</div>';
+  if(P.state==='checking') return h+'<div class="checking">🔎 Leggo la tua scrittura…</div></div>';
+  if(P.res){const r=P.res,cls=r.esito==='quasi'?'mid':'ko',t={quasi:'Quasi giusto! 🔍',sbagliato:'Non ancora…',illeggibile:'Non riesco a leggere 📷'}[r.esito]||'Riprova';
+    h+=`<div class="fb ${cls}"><span class="t">${t}</span>${r.letto&&r.esito!=='illeggibile'?`<span>Ho letto: <i>${esc(r.letto)}</i></span>`:''}${r.indizio?`<span>💡 ${esc(r.indizio)}</span>`:''}<span>${r.esito==='illeggibile'?'Scrivi più grande e fotografa più da vicino, con tanta luce.':'Correggi sul foglio e rifai la foto.'}</span></div>`;}
+  if(P.self) return h+`<div class="fb mid"><span class="t">Controlla tu!</span><span>${esc(P.self)} Confronta il tuo foglio con la soluzione, lettera per lettera:</span><span class="sol">${esc(q.ans[0])}</span></div>
+    <div class="row"><button class="btn ghost" id="b-selfko">✗ C'è un errore</button><button class="btn" id="b-selfok">✓ È uguale</button></div></div>`;
+  h+=`<div class="row" style="justify-content:center"><label class="btn big camlbl">📷 ${P.url?'Rifai la foto':'Fotografa il foglio'}<input type="file" id="cam" accept="image/*" capture="environment" class="vh"></label>${(P.tries||0)>=2?'<button class="btn ghost" id="b-showsol">Mostra la soluzione</button>':''}</div>`;
+  return h+'</div>';}
+async function onPhoto(file){if(!file||!run) return; const q=run.qs[run.i],P=run.ph=run.ph||{tries:0};
+  if(P.url) URL.revokeObjectURL(P.url);
+  const blob=await shrink(file); P.url=URL.createObjectURL(blob); P.res=null; P.self=null;
+  const mode=checker();
+  if(!mode){P.self='Ora controlla tu.';render();return}
+  P.state='checking'; render();
+  try{const r=await aiCheck(q,blob,mode); P.state=null;
+    if(!r||!r.esito) throw {code:'bad'};
+    if(r.esito==='giusto'){phDone(true,r);return}
+    P.tries++; P.res=r; render();
+  }catch(e){P.state=null; if(e&&(e.code==='not_granted'||e.code==='sampling_disabled')) SAMPLE=null; P.res=null; P.self=errMsg(e); render();}}
+function phDone(ok,r){const q=run.qs[run.i]; run.done=true; run.note=r&&r.complimento?r.complimento:(ok?'':'Copia la soluzione giusta sul foglio.');
+  record(q,ok,ok?((run.ph&&run.ph.tries)?10:15):0); render(); say1(q.ans[0]);}
 function buildTest(){const keep=S.units;S.units=[1,2,3];const qs=[];
   [['voc','Partie 1 · Vocabulaire'],['eco','Partie 2 · Écoute'],['ecr','Partie 3 · Écriture']].forEach(([k,sec])=>build(k,4).forEach(q=>{q.sec=sec;qs.push(q)}));
   S.units=keep;return qs;}
@@ -359,8 +446,10 @@ function homeView(){
   return st+`<section style="display:grid;gap:10px"><h2>Unità da ripassare</h2><div class="units">
     ${[1,2,3].map(u=>`<button class="chip" data-unit="${u}" aria-pressed="${on(u)}">Unité ${u}</button>`).join('')}</div>
     <div class="note">Unité 1: saluti, s'appeler, numeri 1–10 · Unité 2: famiglia, animali, età · Unité 3: astuccio, colori, mon/ma</div></section>
-    ${hwOn()?hwBanner():''}<section style="display:grid;gap:10px"><h2>Prepararsi al test</h2><div class="cards">
-    <button class="scheda testcard" data-start="test"><span class="ico">🏆</span><span class="fr">Test des unités 1 – 3</span><span class="it">12 domande: vocabolario, ascolto e scrittura · bonus fino a 50 punti</span></button></div>${progHTML()}</section>
+    ${hwOn()?hwBanner():''}<section style="display:grid;gap:10px"><h2>Prepararsi al test</h2><div class="cards two">
+    <button class="scheda testcard" data-start="test"><span class="ico">🏆</span><span class="fr">Test des unités 1 – 3</span><span class="it">12 domande: vocabolario, ascolto e scrittura · bonus fino a 50 punti</span></button>
+    <button class="scheda" data-start="f2"><span class="ico">🎯</span><span class="fr">Focus Unité 2</span><span class="it">Famiglia, animali, età · 10 domande, 2 da scrivere sul foglio</span></button>
+    <button class="scheda" data-start="carta"><span class="ico">✏️</span><span class="fr">Sur la feuille</span><span class="it">5 risposte da scrivere a mano e fotografare</span></button></div>${progHTML()}</section>
     <section style="display:grid;gap:10px"><h2>Scegli la scheda</h2><div class="cards">
     ${['voc','eco','ecr'].map(k=>[k,NAMES[k]]).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr">${n[1]}</span><span class="it">${n[2]} · 8 domande</span></button>`).join('')}
     </div></section>${noVoice}`;
@@ -375,6 +464,8 @@ function quizView(){
     main+=`<div class="opts" style="${q.opts.length===3?'grid-template-columns:repeat(3,1fr)':''}">${q.opts.map((o,i)=>{
       let c=''; if(run.done){ if(i===q.a)c='right'; else if(i===run.choice)c='wrong'; }
       return `<button class="opt ${c}" data-opt="${i}" ${run.done?'disabled':''}>${o}</button>`}).join('')}</div>`;
+  } else if(q.type==='ph'){
+    main+=phView(q);
   } else {
     main+=`<div class="type"><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Scrivi qui…" ${run.done?'disabled':''} value="${esc(run.typed||'')}">
       ${run.done?'':`<div class="keys">${["é","è","ê","à","ç","œ","'"].map(k=>`<button class="key" data-k="${k}">${k}</button>`).join('')}</div>
@@ -386,7 +477,7 @@ function quizView(){
 function fbView(q){
   const ok=q.res; let h=`<div class="fb ${ok?'ok':'ko'}"><span class="t">${ok?pick(['Bravissima!','Très bien !','Super !','Esatto!']):'Non proprio…'}</span>`;
   if(ok) h+=`<span class="plus">+${q.pts} punti${q.bonus?' · 3 giuste di fila, bonus! 🔥':''}</span>`;
-  if(q.type==='tx'){ h+=`<span>Risposta giusta:</span><span class="sol">${esc(q.sayFull||q.ans[0])}</span>`; if(run.note) h+=`<span>${esc(run.note)}</span>`; }
+  if(q.type==='tx'||q.type==='ph'){ h+=`<span>Risposta giusta:</span><span class="sol">${esc(q.sayFull||q.ans[0])}</span>`; if(run.note) h+=`<span>${esc(run.note)}</span>`; }
   if(q.reveal) h+=`<span>Hai sentito: <span class="sol">${esc(q.reveal)}</span></span>`;
   if(q.sayAfter&&!ok) h+=`<span class="sol">${esc(q.sayAfter)}</span>`;
   if(q.tip) h+=`<span>${esc(q.tip)}</span>`;
@@ -395,7 +486,7 @@ function fbView(q){
   return h;
 }
 function endView(){
-  const sc=run.qs.filter(q=>q.res).length, t=run.qs.length, p=sc/t, st=p>=.9?3:p>=.7?2:p>=.4?1:0, isT=run.kind==='test';
+  const sc=run.qs.filter(q=>q.res).length, t=run.qs.length, p=sc/t, st=p>=.9?3:p>=.7?2:p>=.4?1:0, isT=run.kind==='test'||run.kind==='f2';
   const wrong=run.qs.filter(q=>!q.res);
   const msg=isT?(p>=.9?'Pronta per il test ! 💪':p>=.7?'Presque ! Ripassa le parole qui sotto.':'Ripassiamo ancora un po\' insieme.'):(st===3?'Bravo Gloria !':st===2?'Très bien !':'Continue, Gloria !');
   return `<div class="panel" style="display:grid;gap:16px">
@@ -425,6 +516,9 @@ function progView(){
    <div class="row"><button class="btn" id="b-dl">Scarica backup</button><button class="btn ghost" id="b-copy">Copia</button><span class="note" id="copymsg"></span></div>
    <textarea id="imp" placeholder="Incolla qui un backup JSON…"></textarea>
    <div class="row"><input type="file" id="file" accept=".json,application/json"><button class="btn" id="b-imp">Importa</button></div><span class="note" id="impmsg"></span>
+   <h2 style="margin-top:10px">Correzione delle foto (per papà e mamma)</h2><p class="note">${aiModeText()}</p>
+   ${SAMPLE?'':`<input type="password" id="apikey" class="keyin" placeholder="Chiave API Anthropic (sk-ant-…)" autocomplete="off">
+   <div class="row"><button class="btn ghost" id="b-keydel">Rimuovi chiave</button><button class="btn" id="b-keysave">Salva chiave</button></div><span class="note" id="keymsg"></span>`}
    <div class="row"><span class="note">Azzera tutti i progressi</span><button class="btn ghost" id="b-reset">${resetArm?'Sicuro? Tocca di nuovo':'Azzera'}</button></div></div></div>`;
 }
 let resetArm=false;
@@ -432,15 +526,15 @@ let resetArm=false;
 /* ===== AZIONI ===== */
 function start(kind){
   if(!startTimer()) return;
-  const qs=kind==='test'?buildTest():build(kind); if(!qs.length){alertBox('Scegli almeno un\'unità adatta a questa scheda.');return}
+  const qs=kind==='test'?buildTest():kind==='f2'?buildFocus2():kind==='carta'?buildCarta():build(kind); if(!qs.length){alertBox('Scegli almeno un\'unità adatta a questa scheda.');return}
   run={kind,qs,i:0,done:false,earned:0,streak:0,bonus:0,newAni:[]}; screen='quiz'; render(); autoSay();
 }
 function autoSay(){const q=run.qs[run.i]; if(q.listen) speak(q.listen)}
-function record(q,ok){const s=S.stats[q.key]||(S.stats[q.key]={ok:0,ko:0}); ok?s.ok++:s.ko++; q.res=ok;
-  if(ok){run.streak++; q.bonus=run.streak%3===0; q.pts=10+(q.bonus?5:0); S.points=(S.points||0)+q.pts; run.earned+=q.pts;} else run.streak=0;
+function record(q,ok,base=10){const s=S.stats[q.key]||(S.stats[q.key]={ok:0,ko:0}); ok?s.ok++:s.ko++; q.res=ok;
+  if(ok){run.streak++; q.bonus=run.streak%3===0; q.pts=base+(q.bonus?5:0); S.points=(S.points||0)+q.pts; run.earned+=q.pts;} else run.streak=0;
   save()}
 function finish(){const sc=run.qs.filter(q=>q.res).length,p=sc/run.qs.length;
-  run.bonus=run.kind==='test'?(p===1?50:p>=.8?30:p>=.6?10:0):(p===1?20:0);
+  run.bonus=(run.kind==='test'||run.kind==='f2')?(p===1?50:p>=.8?30:p>=.6?10:0):(p===1?20:0);
   S.points=(S.points||0)+run.bonus; run.earned+=run.bonus; S.history[S.history.length-1].p=run.earned;
   const n=ANI.filter(a=>a[0]<=S.points).length; run.newAni=ANI.slice(S.seen||0,n); S.seen=Math.max(S.seen||0,n);
   run.newHw=null; if(hwOn()&&p>=.7&&(S.hw||0)<HW.length){run.newHw=HW[S.hw||0]; S.hw=(S.hw||0)+1;}}
@@ -461,7 +555,7 @@ function check(){
 }
 function next(){
   try{speechSynthesis.cancel()}catch(e){}
-  if(run.i+1<run.qs.length){run.i++;run.done=false;run.typed='';run.note='';render();autoSay();if(run.qs[run.i].type==='tx')setTimeout(()=>{const i=$('#in');i&&i.focus()},50)}
+  if(run.i+1<run.qs.length){if(run.ph&&run.ph.url)URL.revokeObjectURL(run.ph.url);run.ph=null;run.i++;run.done=false;run.typed='';run.note='';render();autoSay();if(run.qs[run.i].type==='tx')setTimeout(()=>{const i=$('#in');i&&i.focus()},50)}
   else{const d=new Date();S.history.push({d:d.toLocaleDateString('it-CH')+' '+d.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'}),k:run.kind,s:run.qs.filter(q=>q.res).length,t:run.qs.length});finish();save();screen='end';render();const nm=[...(run.newHw?[[run.newHw[1],'c']]:[]),...run.newAni.map(a=>[a[2],'c'])]; if(nm.length)setTimeout(()=>speak(nm),500)}
 }
 function alertBox(msg){const w=document.createElement('div');w.className='warn';w.textContent=msg;$('#app').appendChild(w);setTimeout(()=>w.remove(),3500)}
@@ -477,6 +571,12 @@ function bind(){
   document.querySelectorAll('[data-unit]').forEach(b=>b.onclick=()=>{const u=+b.dataset.unit; if(on(u)){if(S.units.length>1)S.units=S.units.filter(x=>x!==u)}else S.units=[...S.units,u].sort(); save(); render()});
   document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>answerMC(+b.dataset.opt));
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const i=$('#in'),s=i.selectionStart??i.value.length,e=i.selectionEnd??s;i.value=i.value.slice(0,s)+b.dataset.k+i.value.slice(e);i.focus();i.setSelectionRange(s+1,s+1)});
+  const cam=$('#cam'); if(cam) cam.onchange=()=>onPhoto(cam.files&&cam.files[0]);
+  const ss=$('#b-showsol'); if(ss) ss.onclick=()=>phDone(false);
+  const sok=$('#b-selfok'); if(sok) sok.onclick=()=>phDone(true);
+  const sko=$('#b-selfko'); if(sko) sko.onclick=()=>phDone(false);
+  const ks=$('#b-keysave'); if(ks) ks.onclick=()=>{const v=$('#apikey').value.trim(); if(!/^sk-ant-/.test(v)){$('#keymsg').textContent='La chiave deve iniziare con sk-ant-';return} try{localStorage.setItem('gloria-fr-key',v)}catch(e){} render();};
+  const kd=$('#b-keydel'); if(kd) kd.onclick=()=>{try{localStorage.removeItem('gloria-fr-key')}catch(e){} render();};
   document.querySelectorAll('[data-ani]').forEach(b=>b.onclick=()=>speak([[b.dataset.ani,'c']]));
   const bt=$('#b-timer'); if(bt) bt.onclick=()=>{if(!T().run){startTimer();render()}};
   const bg=$('#b-go'); if(bg) bg.onclick=()=>{startTimer();render()};
