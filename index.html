@@ -138,6 +138,14 @@ body.print .ani .fr, body.print .newani .fw{font-family:var(--f-ui);font-weight:
 .checking{text-align:center;font-weight:700;color:var(--ink);padding:10px}
 .fb.mid{background:var(--orange-2);border:1.5px solid var(--orange)}
 .fb.mid .t{color:var(--orange)}
+.calc{font-size:clamp(48px,11vw,76px);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1.2}
+.calc .slot{display:inline-block;min-width:1.6em;border-bottom:4px solid var(--gold);color:var(--text)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:420px;width:100%;justify-self:center;margin:0 auto}
+.pad button{font:inherit;font-size:30px;font-weight:700;min-height:66px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--text);font-variant-numeric:tabular-nums}
+.pad button:active{transform:scale(.96)}
+.pad .ok{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.calcsol{font-size:30px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.fast{font-weight:700;color:var(--gold)}
 .keyin{font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);width:100%;box-sizing:border-box}
 .ani.locked .em{filter:grayscale(1) brightness(0);opacity:.18}
 .timer{font-variant-numeric:tabular-nums;min-width:118px}
@@ -235,7 +243,7 @@ const OBJ_M=['crayon','stylo','livre'], OBJ_F=['trousse','gomme','règle'], COL_
 
 /* ===== STATO ===== */
 const KEY='gloria-fr-v1';
-let S={units:[1,2,3],stats:{},history:[],script:true,slow:false,points:0,seen:0,hw:0};
+let S={units:[1,2,3],stats:{},history:[],script:true,slow:false,points:0,seen:0,hw:0,math:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) S=Object.assign(S,s);}catch(e){}
 function localSave(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function save(){localSave(); markDirty();}
@@ -343,7 +351,7 @@ function build(kind,n=8){
 }
 
 /* ===== SCHERMATE ===== */
-const NAMES={voc:['📚','Vocabulaire','Vocabolario'],eco:['🎧','Écoute','Ascolto'],ecr:['✍️','Écriture','Scrittura'],test:['🏆','Test','Test unità 1–3'],f2:['🎯','Unité 2','Focus unità 2'],carta:['✏️','Sur la feuille','Sul foglio']};
+const NAMES={voc:['📚','Vocabulaire','Vocabolario'],eco:['🎧','Écoute','Ascolto'],ecr:['✍️','Écriture','Scrittura'],add:['➕','Addizioni','Addizioni fino a 20'],sub:['➖','Sottrazioni','Sottrazioni fino a 20'],mul:['✖️','Moltiplicazioni','Per 1, per 2, per 10'],mix:['🔀','Misto','Calcoli misti'],test:['🏆','Test','Test unità 1–3'],f2:['🎯','Unité 2','Focus unità 2'],carta:['✏️','Sur la feuille','Sul foglio']};
 /* ===== PREMI: animali sempre più belli (punti necessari, emoji, francese, italiano) ===== */
 const ANI=[[30,'🐛','la chenille','il bruco'],[80,'🐌',"l'escargot",'la lumaca'],[140,'🐞','la coccinelle','la coccinella'],[220,'🦋','le papillon','la farfalla'],
  [320,'🐣','le poussin','il pulcino'],[440,'🐰','le lapin','il coniglio'],[580,'🦔','le hérisson','il riccio'],[740,'🐿️',"l'écureuil",'lo scoiattolo'],
@@ -436,6 +444,45 @@ async function onPhoto(file){if(!file||!run) return; const q=run.qs[run.i],P=run
   }catch(e){P.state=null; if(e&&(e.code==='not_granted'||e.code==='sampling_disabled')) SAMPLE=null; P.res=null; P.self=errMsg(e); render();}}
 function phDone(ok,r){const q=run.qs[run.i]; run.done=true; run.note=r&&r.complimento?r.complimento:(ok?'':'Copia la soluzione giusta sul foglio.');
   record(q,ok,ok?((run.ph&&run.ph.tries)?10:15):0); render(); say1(q.ans[0]);}
+/* ===== MATEMATICA: calcoli veloci fino a 20 e moltiplicazioni ×1 ×2 ×10 ===== */
+const MATHK=['add','sub','mul','mix'], SYM={'+':'+','-':'−','x':'×'};
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function mFact(op){let a,b;
+  if(op==='+'){ if(Math.random()<.5){a=ri(2,9);b=ri(11-a,9)} else {a=ri(1,18);b=ri(1,20-a)} if(Math.random()<.5)[a,b]=[b,a]; }
+  else if(op==='-'){ if(Math.random()<.5){a=ri(11,18);b=ri(a-9,9)} else {a=ri(2,20);b=ri(1,a)} }
+  else { a=[1,2,2,2,10,10][ri(0,5)]; b=ri(1,10); if(Math.random()<.5)[a,b]=[b,a]; }
+  return {op,a,b};}
+const mKey=f=>f.a+SYM[f.op]+f.b;
+function mFromKey(k){const m=String(k).match(/^(\d+)([+−×])(\d+)$/); if(!m) return null; return {a:+m[1],op:{'+':'+','−':'-','×':'x'}[m[2]],b:+m[3]}}
+function mQ(f){const ans=f.op==='+'?f.a+f.b:f.op==='-'?f.a-f.b:f.a*f.b;
+  return {type:'num',op:f.op,a:f.a,b:f.b,ans,key:mKey(f),ask:'Quanto fa?',sec:f.op==='+'?'Addizioni':f.op==='-'?'Sottrazioni':'Moltiplicazioni'}}
+function buildMath(kind,n=10){const ops=kind==='add'?['+']:kind==='sub'?['-']:kind==='mul'?['x']:['+','+','-','-','x'];
+  const weak=Object.entries(S.math||{}).filter(([k,v])=>(v.ko||0)*2+(v.slow||0)>(v.ok||0)/2&&((v.ko||0)+(v.slow||0))>0).map(([k])=>mFromKey(k)).filter(f=>f&&ops.includes(f.op));
+  const qs=[],seen=new Set(); let g=0;
+  while(qs.length<n&&g++<300){const f=(weak.length&&Math.random()<.3)?pick(weak):mFact(pick(ops)); const k=mKey(f); if(seen.has(k)) continue; seen.add(k); qs.push(mQ(f));}
+  return qs;}
+function mHint(q){const {a,b,ans,op}=q;
+  if(op==='+'){ if(a===b) return `È un doppio: ${a} + ${a} = ${ans}.`;
+    if(a<10&&b<10&&ans>10){const big=Math.max(a,b),sm=Math.min(a,b),fill=10-big; return `Arriva a 10: ${big} + ${fill} = 10, poi aggiungi ${sm-fill}: 10 + ${sm-fill} = ${ans}.`;}
+    if(a===10||b===10) return `Con il 10 è facile: 10 + ${a===10?b:a} = ${ans}.`;
+    return `Parti dal numero più grande e conta avanti di ${Math.min(a,b)}: ${ans}.`;}
+  if(op==='-'){ const u=a-10;
+    if(a>10&&b<=9&&b>u&&u>0) return `Torna a 10: ${a} − ${u} = 10, poi togli ancora ${b-u}: 10 − ${b-u} = ${ans}.`;
+    return `Controlla con la somma: ${ans} + ${b} = ${a}.`;}
+  const n=a===1||a===2||a===10?b:a, f=a===1||a===2||a===10?a:b;
+  if(f===1) return `Per 1 il numero resta uguale: ${n} × 1 = ${n}.`;
+  if(f===2) return `Per 2 è il doppio: ${n} + ${n} = ${ans}.`;
+  return `Per 10 aggiungi uno zero: ${n} → ${ans}.`;}
+function numPad(){return `<div class="pad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button data-n="${d}">${d}</button>`).join('')}<button data-n="del" aria-label="Cancella">⌫</button><button data-n="0">0</button><button data-n="ok" class="ok" aria-label="Controlla">OK</button></div>`}
+function numKey(k){if(!run||run.done||screen!=='quiz') return; const q=run.qs[run.i]; if(q.type!=='num') return;
+  if(k==='ok') return checkNum(); if(k==='del') run.typed=(run.typed||'').slice(0,-1); else if((run.typed||'').length<3) run.typed=(run.typed||'')+k;
+  const sl=$('#slot'); if(sl) sl.textContent=run.typed||'?';}
+function checkNum(){const q=run.qs[run.i]; if(!run.typed) return;
+  const ok=parseInt(run.typed,10)===q.ans, dt=(Date.now()-(run.t0||Date.now()))/1000; q.dt=dt; q.fast=ok&&dt<=5;
+  run.done=true; record(q,ok,ok?(q.fast?15:10):0); if(ok&&dt>8) S.math[q.key].slow=(S.math[q.key].slow||0)+1; save(); render();
+  if(ok){const i=run.i; setTimeout(()=>{if(run&&run.i===i&&run.done&&screen==='quiz') next();},900);}}
+document.addEventListener('keydown',e=>{if(screen!=='quiz'||!run||run.done) return; const q=run.qs[run.i]; if(!q||q.type!=='num') return;
+  if(/^\d$/.test(e.key)) numKey(e.key); else if(e.key==='Backspace') numKey('del'); else if(e.key==='Enter') numKey('ok'); else return; e.preventDefault();});
 function buildTest(){const keep=S.units;S.units=[1,2,3];const qs=[];
   [['voc','Partie 1 · Vocabulaire'],['eco','Partie 2 · Écoute'],['ecr','Partie 3 · Écriture']].forEach(([k,sec])=>build(k,4).forEach(q=>{q.sec=sec;qs.push(q)}));
   S.units=keep;return qs;}
@@ -452,7 +499,7 @@ function render(){
 }
 function homeView(){
   const noVoice=!('speechSynthesis' in window)?'<div class="warn">Questo browser non può leggere ad alta voce: la scheda Ascolto non funzionerà.</div>':'';
-  const t=T(), st=(!t.run&&left()>0)?`<section style="display:grid;gap:10px"><button class="btn big startbig" id="b-go">▶ Inizio a lavorare</button><span class="note">Hai ${fmt(left())} minuti di francese per oggi. Il tempo parte quando tocchi Inizio.</span></section>`:'';
+  const t=T(), st=(!t.run&&left()>0)?`<section style="display:grid;gap:10px"><button class="btn big startbig" id="b-go">▶ Inizio a lavorare</button><span class="note">Hai ${fmt(left())} minuti per oggi, tra francese e matematica. Il tempo parte quando tocchi Inizio.</span></section>`:'';
   return st+`<section style="display:grid;gap:10px"><h2>Unità da ripassare</h2><div class="units">
     ${[1,2,3].map(u=>`<button class="chip" data-unit="${u}" aria-pressed="${on(u)}">Unité ${u}</button>`).join('')}</div>
     <div class="note">Unité 1: saluti, s'appeler, numeri 1–10 · Unité 2: famiglia, animali, età · Unité 3: astuccio, colori, mon/ma</div></section>
@@ -462,18 +509,23 @@ function homeView(){
     <button class="scheda" data-start="carta"><span class="ico">✏️</span><span class="fr">Sur la feuille</span><span class="it">5 risposte da scrivere a mano e fotografare</span></button></div>${progHTML()}</section>
     <section style="display:grid;gap:10px"><h2>Scegli la scheda</h2><div class="cards">
     ${['voc','eco','ecr'].map(k=>[k,NAMES[k]]).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr">${n[1]}</span><span class="it">${n[2]} · 8 domande</span></button>`).join('')}
+    </div></section>
+    <section style="display:grid;gap:10px"><h2>Matematica · calcoli veloci</h2><div class="cards two">
+    ${MATHK.map(k=>[k,NAMES[k]]).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr" style="font-family:var(--f-ui);font-weight:700">${n[1]}</span><span class="it">${n[2]} · 10 calcoli · ⚡ bonus se rispondi in 5 secondi</span></button>`).join('')}
     </div></section>${noVoice}<p class="note" id="cloudline">${cloudLine()}</p>`;
 }
 function quizView(){
-  const q=run.qs[run.i];
+  const q=run.qs[run.i]; if(!run.done&&run.t0i!==run.i){run.t0=Date.now();run.t0i=run.i;}
   const dots=run.qs.map((x,i)=>`<span class="dot ${x.res===true?'ok':x.res===false?'ko':i===run.i?'now':''}"></span>`).join('');
-  let main=`<div class="prompt"><div class="ask">${esc(q.ask)}</div>${q.body||''}`;
+  let main=`<div class="prompt"><div class="ask">${esc(q.ask)}</div>${q.type==='num'?`<div class="calc">${q.a} ${SYM[q.op]} ${q.b} = <span class="slot" id="slot">${run.done?esc(run.typed):(esc(run.typed||'')||'?')}</span></div>`:''}${q.body||''}`;
   if(q.listen) main+=`<div class="say"><button class="btn" id="b-say">🔊 Ascolta</button><button class="chip" id="b-slow" aria-pressed="${S.slow}">🐢 Lento</button></div>`;
   main+='</div>';
   if(q.type==='mc'){
     main+=`<div class="opts" style="${q.opts.length===3?'grid-template-columns:repeat(3,1fr)':''}">${q.opts.map((o,i)=>{
       let c=''; if(run.done){ if(i===q.a)c='right'; else if(i===run.choice)c='wrong'; }
       return `<button class="opt ${c}" data-opt="${i}" ${run.done?'disabled':''}>${o}</button>`}).join('')}</div>`;
+  } else if(q.type==='num'){
+    if(!run.done) main+=numPad();
   } else if(q.type==='ph'){
     main+=phView(q);
   } else {
@@ -487,12 +539,13 @@ function quizView(){
 function fbView(q){
   const ok=q.res; let h=`<div class="fb ${ok?'ok':'ko'}"><span class="t">${ok?pick(['Bravissima!','Très bien !','Super !','Esatto!']):'Non proprio…'}</span>`;
   if(ok) h+=`<span class="plus">+${q.pts} punti${q.bonus?' · 3 giuste di fila, bonus! 🔥':''}</span>`;
+  if(q.type==='num'){ h+=`<span class="calcsol">${q.a} ${SYM[q.op]} ${q.b} = ${q.ans}</span>`; if(q.fast) h+=`<span class="fast">⚡ Veloce!</span>`; if(!ok) h+=`<span>💡 ${esc(mHint(q))}</span>`; }
   if(q.type==='tx'||q.type==='ph'){ h+=`<span>Risposta giusta:</span><span class="sol">${esc(q.sayFull||q.ans[0])}</span>`; if(run.note) h+=`<span>${esc(run.note)}</span>`; }
   if(q.reveal) h+=`<span>Hai sentito: <span class="sol">${esc(q.reveal)}</span></span>`;
   if(q.sayAfter&&!ok) h+=`<span class="sol">${esc(q.sayAfter)}</span>`;
   if(q.tip) h+=`<span>${esc(q.tip)}</span>`;
   if(q.transcript) h+=`<div class="transcript">${q.transcript.map(l=>`<span><b>${esc(l[0])}:</b> ${esc(l[2])}</span>`).join('')}${q.nw?`<span class="newword">Parola nuova: ${esc(q.nw)}</span>`:''}</div>`;
-  h+=`</div><div class="row"><button class="btn ghost" id="b-rep">🔊 Riascolta</button><button class="btn big" id="b-next">${run.i+1<run.qs.length?'Avanti →':'Fine ⭐'}</button></div>`;
+  h+=`</div><div class="row">${q.type==='num'?'<span></span>':'<button class="btn ghost" id="b-rep">🔊 Riascolta</button>'}<button class="btn big" id="b-next">${run.i+1<run.qs.length?'Avanti →':'Fine ⭐'}</button></div>`;
   return h;
 }
 function endView(){
@@ -504,6 +557,7 @@ function endView(){
    ${(run.newAni||[]).map(a=>`<div class="newani"><span class="ask">Nuovo animale nella tua collezione!</span><span class="em">${a[1]}</span><span class="fw">${esc(a[2])}</span><span class="note">${esc(a[3])}</span><button class="btn ghost" data-ani="${esc(a[2])}">🔊 Ascolta</button></div>`).join('')}
    <div class="stars" aria-label="${st} stelle">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div>
    <div class="score">${sc} / ${t}</div><div class="fw" style="text-align:center">${msg}</div>
+   ${run.qs[0].type==='num'?`<div class="note" style="text-align:center">Tempo medio per calcolo: ${(run.qs.reduce((a,q)=>a+(q.dt||0),0)/run.qs.length).toFixed(1).replace('.',',')} secondi · ⚡ veloci: ${run.qs.filter(q=>q.fast).length} su ${run.qs.length}</div>`:''}
    <div class="earn">+${run.earned} punti${run.bonus?` (bonus ${isT?'test':'tutto giusto'} +${run.bonus})`:''} · totale 🐾 ${S.points}</div>
    ${progHTML()}
    ${wrong.length?`<div><h2>Da ripassare</h2><div class="transcript" style="margin-top:6px">${wrong.map(q=>`<span>• ${esc(q.key)}</span>`).join('')}</div></div>`:''}
@@ -522,8 +576,10 @@ function progView(){
    <div style="display:grid;gap:8px"><h2>Salvataggio online</h2><div id="cloudbox" style="display:grid;gap:8px">${cloudHTML()}</div></div>
    <div><h2>Ultime schede</h2>${hist.length?`<div style="overflow-x:auto"><table><tr><th>Data</th><th>Scheda</th><th>Giuste</th><th>Punti</th></tr>${hist.map(h=>`<tr><td>${esc(h.d)}</td><td>${NAMES[h.k][2]}</td><td>${h.s}/${h.t}</td><td>${h.p!=null?'+'+h.p:''}</td></tr>`).join('')}</table></div>`:'<p class="note">Nessuna scheda ancora: inizia dal menu!</p>'}</div>
    <div><h2>Parole su cui sbaglia di più</h2>${st.length?`<div style="overflow-x:auto"><table><tr><th>Parola</th><th>Giuste</th><th>Sbagliate</th></tr>${st.map(x=>`<tr><td>${esc(x.k)}</td><td>${x.ok}</td><td>${x.ko}</td></tr>`).join('')}</table></div>`:'<p class="note">Ancora nessun errore registrato.</p>'}</div>
+   ${(()=>{const m=Object.entries(S.math||{}).map(([k,v])=>({k,...v})).filter(x=>(x.ko||0)+(x.slow||0)>0).sort((a,b)=>((b.ko||0)*2+(b.slow||0))-((a.ko||0)*2+(a.slow||0))).slice(0,10);
+     return `<div><h2>Calcoli da allenare</h2>${m.length?`<div style="overflow-x:auto"><table><tr><th>Calcolo</th><th>Giusti</th><th>Sbagliati</th><th>Lenti</th></tr>${m.map(x=>`<tr><td>${esc(x.k)}</td><td>${x.ok||0}</td><td>${x.ko||0}</td><td>${x.slow||0}</td></tr>`).join('')}</table></div><p class="note">Questi calcoli tornano più spesso nelle schede di matematica.</p>`:'<p class="note">Ancora nessun calcolo da allenare.</p>'}</div>`})()}
    <div style="display:grid;gap:8px"><h2>Salva / ripristina (JSON)</h2><p class="note">I progressi restano su questo tablet. Per un backup scarica il file (o copia il testo); per ripristinare scegli il file o incolla il testo qui sotto.</p>
-   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0,hw:S.hw||0,byDev:S.byDev,hwBy:S.hwBy}))}</textarea>
+   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0,hw:S.hw||0,byDev:S.byDev,hwBy:S.hwBy,math:S.math}))}</textarea>
    <div class="row"><button class="btn" id="b-dl">Scarica backup</button><button class="btn ghost" id="b-copy">Copia</button><span class="note" id="copymsg"></span></div>
    <textarea id="imp" placeholder="Incolla qui un backup JSON…"></textarea>
    <div class="row"><input type="file" id="file" accept=".json,application/json"><button class="btn" id="b-imp">Importa</button></div><span class="note" id="impmsg"></span>
@@ -537,11 +593,11 @@ let resetArm=false;
 /* ===== AZIONI ===== */
 function start(kind){
   if(!startTimer()) return;
-  const qs=kind==='test'?buildTest():kind==='f2'?buildFocus2():kind==='carta'?buildCarta():build(kind); if(!qs.length){alertBox('Scegli almeno un\'unità adatta a questa scheda.');return}
+  const qs=MATHK.includes(kind)?buildMath(kind):kind==='test'?buildTest():kind==='f2'?buildFocus2():kind==='carta'?buildCarta():build(kind); if(!qs.length){alertBox('Scegli almeno un\'unità adatta a questa scheda.');return}
   run={kind,qs,i:0,done:false,earned:0,streak:0,bonus:0,newAni:[]}; screen='quiz'; render(); autoSay();
 }
 function autoSay(){const q=run.qs[run.i]; if(q.listen) speak(q.listen)}
-function record(q,ok,base=10){const s=S.stats[q.key]||(S.stats[q.key]={ok:0,ko:0}); ok?s.ok++:s.ko++; q.res=ok;
+function record(q,ok,base=10){S.math=S.math||{}; const s=q.type==='num'?(S.math[q.key]||(S.math[q.key]={ok:0,ko:0,slow:0})):(S.stats[q.key]||(S.stats[q.key]={ok:0,ko:0})); ok?s.ok++:s.ko++; q.res=ok;
   if(ok){run.streak++; q.bonus=run.streak%3===0; q.pts=base+(q.bonus?5:0); addPts(q.pts); run.earned+=q.pts;} else run.streak=0;
   save()}
 function finish(){const sc=run.qs.filter(q=>q.res).length,p=sc/run.qs.length;
@@ -572,7 +628,7 @@ function next(){
 function alertBox(msg){const w=document.createElement('div');w.className='warn';w.textContent=msg;$('#app').appendChild(w);setTimeout(()=>w.remove(),3500)}
 function doImport(txt){
   try{const o=JSON.parse(txt); if(typeof o!=='object'||!o) throw 0;
-    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(o.byDev&&typeof o.byDev==='object')S.byDev=o.byDev; else if(typeof o.points==='number')S.byDev={[DEV]:o.points}; if(o.hwBy&&typeof o.hwBy==='object')S.hwBy=o.hwBy; else if(typeof o.hw==='number')S.hwBy={[DEV]:o.hw}; if(typeof o.seen==='number')S.seen=o.seen; recalc();
+    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(o.byDev&&typeof o.byDev==='object')S.byDev=o.byDev; else if(typeof o.points==='number')S.byDev={[DEV]:o.points}; if(o.hwBy&&typeof o.hwBy==='object')S.hwBy=o.hwBy; else if(typeof o.hw==='number')S.hwBy={[DEV]:o.hw}; if(typeof o.seen==='number')S.seen=o.seen; if(o.math&&typeof o.math==='object')S.math=o.math; recalc();
     save(); render(); $('#impmsg').textContent='Backup importato ✔';
   }catch(e){$('#impmsg').textContent='Il testo non è un backup valido: incolla tutto il JSON copiato prima.'}
 }
@@ -583,6 +639,7 @@ function bind(){
   document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>answerMC(+b.dataset.opt));
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const i=$('#in'),s=i.selectionStart??i.value.length,e=i.selectionEnd??s;i.value=i.value.slice(0,s)+b.dataset.k+i.value.slice(e);i.focus();i.setSelectionRange(s+1,s+1)});
   bindCloud();
+  document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>numKey(b.dataset.n));
   const cam=$('#cam'); if(cam) cam.onchange=()=>onPhoto(cam.files&&cam.files[0]);
   const ss=$('#b-showsol'); if(ss) ss.onclick=()=>phDone(false);
   const sok=$('#b-selfok'); if(sok) sok.onclick=()=>phDone(true);
@@ -604,10 +661,10 @@ function bind(){
   const dl=$('#b-dl'); if(dl) dl.onclick=()=>{try{const b=new Blob([$('#exp').value],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup-francais-gloria-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();$('#copymsg').textContent='Backup scaricato ✔'}catch(e){$('#copymsg').textContent='Download non riuscito: usa Copia.'}};
   const bi=$('#b-imp'); if(bi) bi.onclick=()=>doImport($('#imp').value);
   const fi=$('#file'); if(fi) fi.onchange=()=>{const r=new FileReader();r.onload=()=>doImport(r.result);if(fi.files[0])r.readAsText(fi.files[0])};
-  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.history=[];S.byDev={};S.hwBy={};S.points=0;S.seen=0;S.hw=0;localSave();cloudReset();resetArm=false;render()};
+  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.math={};S.history=[];S.byDev={};S.hwBy={};S.points=0;S.seen=0;S.hw=0;localSave();cloudReset();resetArm=false;render()};
 }
 /* ===== TIMER: 15 minuti al giorno ===== */
-const LIMIT=15*60*1000;
+const LIMIT=20*60*1000;
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 function T(){if(!S.t||S.t.day!==today())S.t={day:today(),used:0,run:false,extra:0};return S.t}
 const left=()=>{const t=T();return Math.max(0,LIMIT+t.extra-t.used)};
@@ -648,11 +705,12 @@ async function initCloud(){
   }catch(e){FB.state='na'; cloudUI();}
 }
 function markDirty(){dirty=true; if(!pushT&&FB.user) pushT=setTimeout(()=>{pushT=null; if(dirty) cloudSync();},20000);}
-function cloudPayload(){return {byDev:S.byDev,hwBy:S.hwBy,seen:S.seen||0,stats:S.stats,history:S.history.slice(-300),t:S.t||null,units:S.units}}
+function cloudPayload(){return {byDev:S.byDev,hwBy:S.hwBy,seen:S.seen||0,stats:S.stats,math:S.math||{},history:S.history.slice(-300),t:S.t||null,units:S.units}}
 const hOrd=h=>{const m=String(h.d).match(/(\d+)\.(\d+)\.(\d+)\D+(\d+):(\d+)/);return m?+(m[3]+m[2].padStart(2,'0')+m[1].padStart(2,'0')+m[4].padStart(2,'0')+m[5]):0};
 function mergeInto(r){if(!r||typeof r!=='object') return;
   const mx=(a,b)=>{const o={...a};for(const k in (b||{})) o[k]=Math.max(+o[k]||0,+b[k]||0);return o};
   S.byDev=mx(S.byDev,r.byDev); S.hwBy=mx(S.hwBy,r.hwBy); S.seen=Math.max(S.seen||0,+r.seen||0);
+  S.math=S.math||{}; for(const k in (r.math||{})){const a=S.math[k]||{ok:0,ko:0,slow:0},b=r.math[k]||{};S.math[k]={ok:Math.max(a.ok||0,+b.ok||0),ko:Math.max(a.ko||0,+b.ko||0),slow:Math.max(a.slow||0,+b.slow||0)}}
   for(const k in (r.stats||{})){const a=S.stats[k]||{ok:0,ko:0},b=r.stats[k]||{};S.stats[k]={ok:Math.max(a.ok,+b.ok||0),ko:Math.max(a.ko,+b.ko||0)}}
   const have=new Set(S.history.map(h=>[h.d,h.k,h.s,h.t].join('|')));
   (r.history||[]).forEach(h=>{const k=[h.d,h.k,h.s,h.t].join('|'); if(!have.has(k)){have.add(k);S.history.push(h)}});
