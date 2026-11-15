@@ -130,6 +130,18 @@ body.print .ani .fr, body.print .newani .fw{font-family:var(--f-ui);font-weight:
 .hwtitle{color:var(--orange)}
 .cards.two{grid-template-columns:1fr 1fr}
 @media (max-width:620px){.cards.two{grid-template-columns:1fr}}
+.tline{min-height:64px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 4px;border-bottom:2.5px solid var(--line);width:100%;box-sizing:border-box}
+.tline.empty::before{content:"Tocca o trascina qui i blocchi";color:var(--muted);font-size:15px}
+.tbank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:6px 0}
+.tile{font-family:var(--f-script);font-size:22px;line-height:1.6;padding:6px 14px;border-radius:12px;border:2px solid var(--line);border-bottom-width:4px;background:var(--card);color:var(--ink);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+body.print .tile{font-family:var(--f-ui);font-weight:700;line-height:1.3;font-size:20px}
+.tile.ghost{color:transparent;background:var(--ink-2);border-color:var(--ink-2);pointer-events:none}
+.tile.drag{position:fixed;z-index:60;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.25);transform:scale(1.08)}
+.tp{font-size:22px;color:var(--ink)}
+.bmsg{font-weight:700;text-align:center}
+.bmsg.ok{color:var(--green)} .bmsg.ko{color:var(--red)}
+.peek{font-family:var(--f-script);font-size:24px;color:var(--ink);text-align:center;min-height:1.6em}
+body.print .peek{font-family:var(--f-ui);font-weight:700}
 .vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
 .camlbl{position:relative;cursor:pointer}
 .camlbl:focus-within{outline:3px solid var(--gold);outline-offset:2px}
@@ -333,7 +345,7 @@ function gen(kind){
     if(on(3)&&N.length) pools.push([3,()=>{const v=pick(N); const pos=(v.g==='m'?'mon ':'ma ')+v.fr;
       return {type:'tx',key:pos,ask:'Scrivi mon o ma',body:`${nounPic(v)}<span class="fw">C'est ___ ${esc(v.fr)}.</span>`,ans:[v.g==='m'?'mon':'ma'],sayFull:"C'est "+pos,tip:v.g==='m'?`mon perché si dice ${art(v)}`:`ma perché si dice ${art(v)}`}}]);
     const M=MOI.filter(m=>on(m.u)); if(M.length) pools.push([3,()=>{const m=pick(M);
-      return {type:'tx',key:m.q,listen:[[m.q,'f']],ask:'Rispondi con una frase',body:`<span class="fw" style="font-size:28px">${esc(m.q)}</span><span class="ask">${esc(m.it)}</span>`,ans:m.a}}]);
+      return {type:'tx',key:m.q,listen:[[m.q,'f']],ask:'Rispondi con una frase',body:`<span class="fw" style="font-size:28px">${esc(m.q)}</span><span class="ask">${esc(m.it)}</span>`,ans:m.a,blocks:m.a[0]}}]);
     const F=FILL.filter(f=>on(f.u)); if(F.length) pools.push([2,()=>{const f=pick(F);
       return {type:'tx',key:f.b+f.a+f.e,ask:'Completa la frase',body:`<span class="fw" style="font-size:28px">${esc(f.b)}<u>&nbsp;?&nbsp;</u>${esc(f.e)}</span><span class="ask">${esc(f.it)}</span>`,ans:[f.a],sayFull:f.b+f.a+f.e}}]);
   }
@@ -385,10 +397,11 @@ const PAPER=[
 function buildCarta(){const W=sh(PAPER.filter(p=>p.t==='w')).slice(0,2),F=sh(PAPER.filter(p=>p.t==='f')).slice(0,3);
   return [...W,...F].map(p=>({type:'ph',key:p.a[0],sec:'Sur la feuille',ask:'Scrivi sul foglio, poi fai la foto',ans:p.a,
     body:`<span class="big">${p.e}</span><span class="bubble">${p.t==='w'?'In francese, con <b>le</b> o <b>la</b>: ':p.q?'':'In francese: '}<b>${esc(p.it)}</b></span>`,
+    blocks:p.t==='f'?p.a[0]:null,
     task:p.t==='w'?`scrivere in francese, con l'articolo le/la, la parola "${p.it}"`:p.q?`rispondere in francese alla domanda "${p.q}" (ha 8 anni)`:`tradurre in francese la frase "${p.it}"`}));}
 function buildFocus2(){const keep=S.units;S.units=[2];const qs=[];
   [['voc','Vocabulaire',3],['eco','Écoute',3],['ecr','Écriture',2]].forEach(([k,sec,n])=>build(k,n).forEach(q=>{q.sec='Unité 2 · '+sec;qs.push(q)}));
-  S.units=keep; buildCarta().filter((q,i)=>i===0||i===2).forEach(q=>{q.sec='Unité 2 · Sur la feuille';qs.push(q)}); return qs;}
+  S.units=keep; buildCarta().filter(q=>q.blocks).slice(0,2).forEach(q=>{q.type='tx';q.ask='Scrivi la frase in francese';q.sec='Unité 2 · Frasi';qs.push(q)}); return qs;}
 let SAMPLE=null;
 try{ if(window.claude&&window.claude.use) window.claude.use('sample').then(async sm=>{ if(!sm) return; const l=await sm.limits().catch(()=>null); if(l&&l.images) SAMPLE=sm; }).catch(()=>{}); }catch(e){}
 const getKey=()=>{try{return localStorage.getItem('gloria-fr-key')||''}catch(e){return ''}};
@@ -443,7 +456,7 @@ async function onPhoto(file){if(!file||!run) return; const q=run.qs[run.i],P=run
     P.tries++; P.res=r; render();
   }catch(e){P.state=null; if(e&&(e.code==='not_granted'||e.code==='sampling_disabled')) SAMPLE=null; P.res=null; P.self=errMsg(e); render();}}
 function phDone(ok,r){const q=run.qs[run.i]; run.done=true; run.note=r&&r.complimento?r.complimento:(ok?'':'Copia la soluzione giusta sul foglio.');
-  record(q,ok,ok?((run.ph&&run.ph.tries)?10:15):0); render(); say1(q.ans[0]);}
+  record(q,ok,ok?(run.peek?5:(run.ph&&run.ph.tries)?10:15):0); render(); say1(q.ans[0]);}
 /* ===== MATEMATICA: calcoli veloci fino a 20 e moltiplicazioni ×1 ×2 ×10 ===== */
 const MATHK=['add','sub','mul','mix'], SYM={'+':'+','-':'−','x':'×'};
 const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -483,6 +496,51 @@ function checkNum(){const q=run.qs[run.i]; if(!run.typed) return;
   if(ok){const i=run.i; setTimeout(()=>{if(run&&run.i===i&&run.done&&screen==='quiz') next();},900);}}
 document.addEventListener('keydown',e=>{if(screen!=='quiz'||!run||run.done) return; const q=run.qs[run.i]; if(!q||q.type!=='num') return;
   if(/^\d$/.test(e.key)) numKey(e.key); else if(e.key==='Backspace') numKey('del'); else if(e.key==='Enter') numKey('ok'); else return; e.preventDefault();});
+/* ===== FRASI A BLOCCHI (stile Duolingo): prima ordina i blocchi, poi scrive da sola ===== */
+const TRAPS={'le':['la'],'la':['le'],'un':['une'],'une':['un'],'frère':['frères'],'frères':['frère'],'sœur':['sœurs'],"j'ai":['je'],'je':['tu'],'tu':['je'],
+ 'elle':['il'],'il':['elle'],'huit':['six'],'six':['huit'],'deux':['trois'],'ans':['an'],'quel':['quelle'],'as':['ai'],'ai':['as'],"n'ai":['ai'],'pas':['ne'],'de':['un'],
+ "m'appelle":["t'appelles"],"t'appelles":["m'appelle"],"s'appelle":["m'appelle"],'va':['vas'],'oui,':['non,'],'non,':['oui,'],'comment':['quel']};
+const bTok=x=>String(x).replace(/\s*[.?!]+\s*$/,'').split(/\s+/).filter(Boolean);
+const bEnd=x=>{const m=String(x).match(/[.?!]\s*$/);return m?m[0].trim():''};
+function initTiles(q){const want=bTok(q.blocks),low=want.map(w=>w.toLowerCase()),traps=[];
+  sh(want).forEach(w=>{(TRAPS[w.toLowerCase()]||[]).forEach(t=>{const cased=w[0]===w[0].toUpperCase()&&w[0]!==w[0].toLowerCase()?t[0].toUpperCase()+t.slice(1):t;
+    if(!low.includes(t.toLowerCase())&&!traps.some(x=>x.toLowerCase()===t.toLowerCase())) traps.push(cased);})});
+  run.tiles={want,all:sh([...want,...sh(traps).slice(0,2)]),ans:[]};}
+function blocksView(q){if(!run.tiles) initTiles(q); const T=run.tiles;
+  return `<div class="tline${T.ans.length?'':' empty'}" id="tline">${T.ans.map(i=>`<button class="tile" data-tile="${i}">${esc(T.all[i])}</button>`).join('')}${T.ans.length?`<span class="tp">${esc(bEnd(q.blocks))}</span>`:''}</div>
+   <div class="tbank" id="tbank">${T.all.map((x,i)=>T.ans.includes(i)?`<span class="tile ghost">${esc(x)}</span>`:`<button class="tile" data-tile="${i}">${esc(x)}</button>`).join('')}</div>
+   ${run.bmsg?`<div class="bmsg ${run.bmsgOk?'ok':'ko'}">${esc(run.bmsg)}</div>`:''}
+   <div class="row">${(run.btries||0)>=2?'<button class="btn ghost" id="b-help">💡 Aiutami</button>':'<span></span>'}<button class="btn big" id="b-bcheck" ${T.ans.length?'':'disabled'}>Controlla</button></div>`;}
+function tapTile(id){const T=run.tiles,k=T.ans.indexOf(id); if(k>=0) T.ans.splice(k,1); else T.ans.push(id); run.bmsg=''; render();}
+function checkBlocks(){const q=run.qs[run.i],T=run.tiles,got=T.ans.map(i=>T.all[i]),want=T.want;
+  if(got.length===want.length&&got.every((w,i)=>w===want[i])){run.bdone=true;run.bmsg='';render();say1(q.blocks);setTimeout(()=>{const i=$('#in');i&&i.focus()},80);return}
+  run.btries=(run.btries||0)+1; let k=0; while(k<got.length&&k<want.length&&got[k]===want[k]) k++;
+  const wrong=got[k]; T.ans=T.ans.slice(0,k); run.bmsgOk=false;
+  if(wrong===undefined) run.bmsg='Fin qui tutto giusto ✓ Mancano ancora dei blocchi.';
+  else run.bmsg=(k?(k===1?'Il primo blocco è giusto ✓ ':`I primi ${k} blocchi sono giusti ✓ `):'')+(want.includes(wrong)?`«${wrong}» va più avanti. Riprova!`:`«${wrong}» è una trappola! 🪤`);
+  render();}
+function helpBlocks(){const T=run.tiles,got=T.ans.map(i=>T.all[i]); let k=0; while(k<got.length&&got[k]===T.want[k]) k++; T.ans=T.ans.slice(0,k);
+  if(k<T.want.length){const idx=T.all.findIndex((x,i)=>x===T.want[k]&&!T.ans.includes(i)); if(idx>=0) T.ans.push(idx);}
+  run.bmsg='Ecco il blocco che viene dopo 💡'; run.bmsgOk=true; render();}
+function askOf(q){if(!q.blocks) return q.ask; if(!run.bdone) return 'Metti i blocchi in ordine e forma la frase'; return q.type==='ph'?'Brava! Ora scrivila sul foglio e fai la foto':'Brava! Ora scrivi tu la frase completa';}
+let DRAG=null;
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('.tile[data-tile]'); if(!b||!run||run.bdone||screen!=='quiz') return;
+  DRAG={id:+b.dataset.tile,x:e.clientX,y:e.clientY,el:b,moved:false,ghost:null}; e.preventDefault();});
+document.addEventListener('pointermove',e=>{if(!DRAG) return; const dx=e.clientX-DRAG.x,dy=e.clientY-DRAG.y;
+  if(!DRAG.moved&&dx*dx+dy*dy>64){DRAG.moved=true; const g=DRAG.el.cloneNode(true); g.classList.add('drag'); document.body.appendChild(g); DRAG.ghost=g; DRAG.el.style.opacity='.3';}
+  if(DRAG.moved){const g=DRAG.ghost; g.style.left=(e.clientX-g.offsetWidth/2)+'px'; g.style.top=(e.clientY-g.offsetHeight/2)+'px'; e.preventDefault();}},{passive:false});
+function endDrag(e,cancel){if(!DRAG) return; const d=DRAG; DRAG=null; if(d.ghost) d.ghost.remove();
+  if(cancel){render();return} if(!d.moved){tapTile(d.id);return}
+  const T=run.tiles,line=$('#tline').getBoundingClientRect(),x=e.clientX,y=e.clientY; T.ans=T.ans.filter(i=>i!==d.id);
+  if(y>line.top-30&&y<line.bottom+30){let pos=T.ans.length;
+    const els=[...document.querySelectorAll('#tline .tile')].filter(el=>+el.dataset.tile!==d.id);
+    for(let j=0;j<els.length;j++){const r=els[j].getBoundingClientRect(); if(y<r.top||(y<=r.bottom&&x<r.left+r.width/2)){pos=T.ans.indexOf(+els[j].dataset.tile);break}}
+    T.ans.splice(pos,0,d.id);}
+  run.bmsg=''; render();}
+document.addEventListener('pointerup',e=>endDrag(e,false));
+document.addEventListener('pointercancel',e=>endDrag(e,true));
+document.addEventListener('click',e=>{const b=e.target.closest('.tile[data-tile]'); if(b&&e.detail===0&&run&&!run.bdone) tapTile(+b.dataset.tile);});
+function peekSentence(){const q=run.qs[run.i],el=$('#peek'); if(!el) return; run.peek=true; el.textContent=q.blocks; setTimeout(()=>{if(el.isConnected) el.textContent=''},3000);}
 function buildTest(){const keep=S.units;S.units=[1,2,3];const qs=[];
   [['voc','Partie 1 · Vocabulaire'],['eco','Partie 2 · Écoute'],['ecr','Partie 3 · Écriture']].forEach(([k,sec])=>build(k,4).forEach(q=>{q.sec=sec;qs.push(q)}));
   S.units=keep;return qs;}
@@ -517,10 +575,12 @@ function homeView(){
 function quizView(){
   const q=run.qs[run.i]; if(!run.done&&run.t0i!==run.i){run.t0=Date.now();run.t0i=run.i;}
   const dots=run.qs.map((x,i)=>`<span class="dot ${x.res===true?'ok':x.res===false?'ko':i===run.i?'now':''}"></span>`).join('');
-  let main=`<div class="prompt"><div class="ask">${esc(q.ask)}</div>${q.type==='num'?`<div class="calc">${q.a} ${SYM[q.op]} ${q.b} = <span class="slot" id="slot">${run.done?esc(run.typed):(esc(run.typed||'')||'?')}</span></div>`:''}${q.body||''}`;
+  let main=`<div class="prompt"><div class="ask">${esc(askOf(q))}</div>${q.type==='num'?`<div class="calc">${q.a} ${SYM[q.op]} ${q.b} = <span class="slot" id="slot">${run.done?esc(run.typed):(esc(run.typed||'')||'?')}</span></div>`:''}${q.body||''}`;
   if(q.listen) main+=`<div class="say"><button class="btn" id="b-say">🔊 Ascolta</button><button class="chip" id="b-slow" aria-pressed="${S.slow}">🐢 Lento</button></div>`;
   main+='</div>';
-  if(q.type==='mc'){
+  if(q.blocks&&!run.bdone){
+    main+=blocksView(q);
+  } else if(q.type==='mc'){
     main+=`<div class="opts" style="${q.opts.length===3?'grid-template-columns:repeat(3,1fr)':''}">${q.opts.map((o,i)=>{
       let c=''; if(run.done){ if(i===q.a)c='right'; else if(i===run.choice)c='wrong'; }
       return `<button class="opt ${c}" data-opt="${i}" ${run.done?'disabled':''}>${o}</button>`}).join('')}</div>`;
@@ -533,6 +593,7 @@ function quizView(){
       ${run.done?'':`<div class="keys">${["é","è","ê","à","ç","œ","'"].map(k=>`<button class="key" data-k="${k}">${k}</button>`).join('')}</div>
       <div class="row"><span></span><button class="btn" id="b-check">Controlla</button></div>`}</div>`;
   }
+  if(q.blocks&&run.bdone&&!run.done) main+=`<div class="row" style="justify-content:center"><button class="btn ghost" id="b-peek">👀 Sbircia la frase (3 secondi)</button></div><div class="peek" id="peek"></div>`;
   if(run.done) main+=fbView(q);
   return `<div class="panel" style="display:grid;gap:16px"><div class="top"><span class="note">${NAMES[run.kind][0]} ${q.sec?esc(q.sec):NAMES[run.kind][2]} · ${run.i+1}/${run.qs.length} · <b class="ptsnow">⭐ ${run.earned}</b></span><div class="dots">${dots}</div></div>${main}</div>`;
 }
@@ -618,11 +679,11 @@ function check(){
   }
   if(!ok&&q.noun&&norm(v,0)===norm(q.noun,0)) run.note='Manca l\'articolo: le o la?';
   if(!ok&&q.ans.some(a=>norm(v,0).replace(/[^a-z']/g,'')===norm(a,0).replace(/[^a-z']/g,''))){ok=true;run.note='Giusto! Controlla solo spazi e apostrofi.'}
-  run.done=true; record(q,ok); render(); say1(q.sayFull||q.ans[0]);
+  run.done=true; record(q,ok,run.peek?5:10); render(); say1(q.sayFull||q.ans[0]);
 }
 function next(){
   try{speechSynthesis.cancel()}catch(e){}
-  if(run.i+1<run.qs.length){if(run.ph&&run.ph.url)URL.revokeObjectURL(run.ph.url);run.ph=null;run.i++;run.done=false;run.typed='';run.note='';render();autoSay();if(run.qs[run.i].type==='tx')setTimeout(()=>{const i=$('#in');i&&i.focus()},50)}
+  if(run.i+1<run.qs.length){if(run.ph&&run.ph.url)URL.revokeObjectURL(run.ph.url);run.ph=null;run.bdone=false;run.tiles=null;run.peek=false;run.btries=0;run.bmsg='';run.i++;run.done=false;run.typed='';run.note='';render();autoSay();if(run.qs[run.i].type==='tx')setTimeout(()=>{const i=$('#in');i&&i.focus()},50)}
   else{const d=new Date();S.history.push({d:d.toLocaleDateString('it-CH')+' '+d.toLocaleTimeString('it-CH',{hour:'2-digit',minute:'2-digit'}),k:run.kind,s:run.qs.filter(q=>q.res).length,t:run.qs.length});finish();save();cloudSync();screen='end';render();const nm=[...(run.newHw?[[run.newHw[1],'c']]:[]),...run.newAni.map(a=>[a[2],'c'])]; if(nm.length)setTimeout(()=>speak(nm),500)}
 }
 function alertBox(msg){const w=document.createElement('div');w.className='warn';w.textContent=msg;$('#app').appendChild(w);setTimeout(()=>w.remove(),3500)}
@@ -639,6 +700,9 @@ function bind(){
   document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>answerMC(+b.dataset.opt));
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const i=$('#in'),s=i.selectionStart??i.value.length,e=i.selectionEnd??s;i.value=i.value.slice(0,s)+b.dataset.k+i.value.slice(e);i.focus();i.setSelectionRange(s+1,s+1)});
   bindCloud();
+  const bc2=$('#b-bcheck'); if(bc2) bc2.onclick=checkBlocks;
+  const bh=$('#b-help'); if(bh) bh.onclick=helpBlocks;
+  const pk=$('#b-peek'); if(pk) pk.onclick=peekSentence;
   document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>numKey(b.dataset.n));
   const cam=$('#cam'); if(cam) cam.onchange=()=>onPhoto(cam.files&&cam.files[0]);
   const ss=$('#b-showsol'); if(ss) ss.onclick=()=>phDone(false);
