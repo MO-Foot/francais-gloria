@@ -179,7 +179,13 @@ body.print .peek{font-family:var(--f-ui);font-weight:700}
   <div class="fw" id="locktitle">C'est fini pour aujourd'hui !</div>
   <p class="locktxt">Per oggi hai lavorato abbastanza, brava!<br>Chiama <b>papà</b> o <b>mamma</b>.</p>
   <div class="note" id="locksum"></div>
-  <button id="b-parent" class="chip">Solo per papà e mamma: tieni premuto 3 secondi</button>
+  <button id="b-parent" class="chip">Solo per papà e mamma</button>
+  <div id="pgate" hidden style="display:grid;gap:10px;justify-items:center">
+    <span class="note">Per aggiungere tempo risolvi questo calcolo:</span>
+    <span class="calc" style="font-size:40px" id="pq"></span>
+    <div class="row" style="justify-content:center;flex-wrap:nowrap"><input id="pin" class="keyin" style="max-width:160px;font-size:24px;text-align:center" inputmode="numeric" autocomplete="off" aria-label="Risultato"><button class="btn" id="b-pok">OK</button></div>
+    <span class="note" id="pmsg"></span>
+  </div>
   <div id="parentopts" hidden class="row" style="justify-content:center"><button class="btn ghost" data-extra="5">+5 minuti</button><button class="btn" data-extra="15">+15 minuti</button></div>
 </div></div>
 
@@ -747,12 +753,17 @@ function tick(){const t=T();
 function showLock(){try{speechSynthesis.cancel()}catch(e){}
   const d=new Date().toLocaleDateString('it-CH'), n=S.history.filter(h=>String(h.d).startsWith(d)).length;
   $('#locksum').textContent=n?`Oggi hai completato ${n} ${n===1?'scheda':'schede'} ⭐`:'';
-  $('#parentopts').hidden=true; $('#b-parent').hidden=false; $('#lock').hidden=false; updTimer();}
-(function(){const b=$('#b-parent'); let h=null;
-  const stop=()=>{clearTimeout(h);h=null;b.textContent='Solo per papà e mamma: tieni premuto 3 secondi'};
-  b.addEventListener('pointerdown',e=>{e.preventDefault();b.textContent='Continua a tenere premuto…';h=setTimeout(()=>{h=null;b.hidden=true;$('#parentopts').hidden=false},3000)});
-  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{if(h)stop()}));
-  b.addEventListener('contextmenu',e=>e.preventDefault());
+  $('#parentopts').hidden=true; $('#pgate').hidden=true; $('#b-parent').hidden=false; $('#lock').hidden=false; updTimer();}
+(function(){const b=$('#b-parent'); let pa=0,pb=0,fails=0,wait=0;
+  const nz=(lo,hi)=>{let x; do{x=ri(lo,hi)}while(x%10===0||x%11===0); return x};
+  const newQ=()=>{pa=nz(23,98); pb=nz(13,89); $('#pq').textContent=pa+' × '+pb+' = ?'; $('#pin').value='';};
+  const stop=()=>{b.hidden=false; $('#pgate').hidden=true; $('#pmsg').textContent=''; fails=0;};
+  b.onclick=()=>{b.hidden=true; $('#pgate').hidden=false; newQ(); $('#pmsg').textContent=''; setTimeout(()=>$('#pin').focus(),50);};
+  const tryIt=()=>{if(Date.now()<wait) return; const v=parseInt(String($('#pin').value).replace(/\D/g,''),10);
+    if(v===pa*pb){$('#pgate').hidden=true; $('#parentopts').hidden=false; fails=0; return;}
+    fails++; if(fails>=3){wait=Date.now()+30000; $('#pmsg').textContent='Sbagliato 3 volte: aspetta 30 secondi.'; setTimeout(()=>{$('#pmsg').textContent=''; newQ();},30000); return;}
+    $('#pmsg').textContent='Non è giusto. Ecco un altro calcolo.'; newQ();};
+  $('#b-pok').onclick=tryIt; $('#pin').onkeydown=e=>{if(e.key==='Enter')tryIt()};
   document.querySelectorAll('[data-extra]').forEach(x=>x.onclick=()=>{const t=T(); t.extra=Math.max(t.extra,t.used-LIMIT)+(+x.dataset.extra)*60000; t.run=true; lastTick=Date.now(); save(); $('#lock').hidden=true; stop(); updTimer();});
 })();
 setInterval(tick,1000);

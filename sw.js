@@ -11,7 +11,7 @@
  * cache in background a ogni apertura online, ma cambiare il numero
  * forza un aggiornamento più deciso e pulito).
  */
-const CACHE_NAME = "francais-gloria-v8";
+const CACHE_NAME = "francais-gloria-v9";
 
 // Percorsi relativi alla cartella dove si trova QUESTO file (sw.js) —
 // deve stare nella stessa cartella di index.html.
