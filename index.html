@@ -17,7 +17,7 @@
 <style>
 /* Layout: un quaderno a quadretti. Colonna unica centrata, tasti grandi per tablet; inchiostro blu per il francese, penna rossa per le correzioni. */
 :root{
-  --veil:rgba(18,28,60,.6); --orange:#d95f00; --orange-2:#fff1e3; --night:#2b1d45;
+  --veil:rgba(18,28,60,.6); --sun:#fff3c4; --orange:#d95f00; --orange-2:#fff1e3; --night:#2b1d45;
   --paper:#fbfcff; --grid:rgba(60,100,190,.12); --card:#ffffff; --line:#d3dcef;
   --text:#1b2335; --muted:#5b6784; --ink:#1d3a8a; --ink-2:#e8eeff;
   --red:#cf3329; --red-2:#fdeceb; --green:#1f8754; --green-2:#e5f6ed; --gold:#e3a614;
@@ -28,11 +28,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#121826; --grid:rgba(140,170,240,.07); --card:#1b2334; --line:#2d3a55;
   --text:#e6ebf6; --muted:#9aa6c4; --ink:#a9c0ff; --ink-2:#22305a;
-  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); --orange:#ff9d47; --orange-2:#3a2614; --night:#e9dcff; color-scheme:dark}}
+  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); --sun:#3a3214; --orange:#ff9d47; --orange-2:#3a2614; --night:#e9dcff; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#121826; --grid:rgba(140,170,240,.07); --card:#1b2334; --line:#2d3a55;
   --text:#e6ebf6; --muted:#9aa6c4; --ink:#a9c0ff; --ink-2:#22305a;
-  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); --orange:#ff9d47; --orange-2:#3a2614; --night:#e9dcff; color-scheme:dark}
+  --red:#ff7f72; --red-2:#3a1f24; --green:#5fd39a; --green-2:#173426; --gold:#f2c14a; --veil:rgba(0,0,0,.72); --sun:#3a3214; --orange:#ff9d47; --orange-2:#3a2614; --night:#e9dcff; color-scheme:dark}
 [hidden]{display:none!important}
 html,body{min-height:100%;margin:0}
 img{max-width:100%}
@@ -142,6 +142,59 @@ body.print .tile{font-family:var(--f-ui);font-weight:700;line-height:1.3;font-si
 .bmsg.ok{color:var(--green)} .bmsg.ko{color:var(--red)}
 .peek{font-family:var(--f-script);font-size:24px;color:var(--ink);text-align:center;min-height:1.6em}
 body.print .peek{font-family:var(--f-ui);font-weight:700}
+.th-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.th-h2{flex:1;margin:0;font-size:24px;color:var(--ink);text-transform:none;letter-spacing:0}
+.th-pill{white-space:nowrap;font-size:16px;background:var(--sun);border:1.5px solid var(--gold);border-radius:99px;padding:3px 10px;color:var(--text);font-variant-numeric:tabular-nums}
+.th-sub{margin:0;color:var(--muted)}
+.th-list{display:grid;gap:12px}
+.th-card{display:flex;align-items:center;gap:14px;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:12px 16px;min-height:72px}
+.th-card:hover{border-color:var(--ink)}
+.th-card-icon{font-size:40px;line-height:1}
+.th-card-title{flex:1;min-width:0;font-size:19px;font-weight:700;color:var(--ink)}
+.th-card-tix{white-space:nowrap}
+.th-card-tix i{font-style:normal;font-size:24px;filter:grayscale(1);opacity:.3}
+.th-card-tix i.on{filter:none;opacity:1}
+.th-all{background:var(--orange-2);border-color:var(--orange)}
+.th-mtitle{font-size:22px;margin:0;color:var(--ink)}
+.th-cast{display:flex;gap:8px;flex-wrap:wrap}
+.th-actor{display:flex;flex-direction:column;align-items:center;font-size:30px;line-height:1.2;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:4px 8px;transition:transform .2s}
+.th-actor small{font-size:12px;font-weight:700;color:var(--muted)}
+.th-actor.me{border-color:var(--orange)}
+.th-actor.on{transform:scale(1.15);border-color:var(--ink);background:var(--sun)}
+.th-stage{display:flex;align-items:center;gap:16px;min-height:150px;padding:16px;border:3px solid var(--ink);border-top-width:14px;border-radius:22px;background:var(--card)}
+.th-stage.me{background:var(--sun);border-color:var(--gold)}
+.th-stage.narr .th-bubble{font-style:italic;color:var(--muted)}
+.th-face{font-size:72px;line-height:1}
+.th-bubble-wrap{flex:1;min-width:0}
+.th-who{font-weight:700;font-size:18px;color:var(--ink)}
+.th-bubble{font-size:21px;line-height:1.45}
+.th-turn{text-align:center;padding:14px;border:3px dashed var(--orange);border-radius:22px;background:var(--orange-2);display:grid;gap:6px}
+.th-turn-label{font-size:32px;font-weight:700;color:var(--orange)}
+.th-mic{font-size:60px;width:128px;height:128px;border-radius:50%;background:var(--orange);border:4px solid var(--ink);margin:6px auto;display:grid;place-items:center;line-height:1}
+.th-mic.pulse{animation:thpulse 1.2s ease-in-out infinite}
+.th-mic.listening{background:var(--red);animation:thpulse .6s ease-in-out infinite}
+@keyframes thpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.th-heard{min-height:1.4em;color:var(--muted)}
+.th-result{font-size:24px;font-weight:700;min-height:1.3em;color:var(--text)}
+.th-hint{margin:0 auto;max-width:700px;font-size:20px;background:var(--card);border-radius:14px;padding:8px 12px}
+.th-judge{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.th-small{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+.th-link{background:none;border:none;font-size:15px;color:var(--muted);text-decoration:underline;padding:6px}
+.th-status{min-height:1.4em;text-align:center;color:var(--muted)}
+.th-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.th-controls.busy .th-b1,.th-controls.busy .th-b2,.th-controls.busy .th-b3{opacity:.45}
+.th-btn{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:18px;font-weight:700;padding:12px 4px;border-radius:18px;border:2px solid var(--line);color:var(--text)}
+.th-btn span{font-size:36px;line-height:1.1}
+.th-b1{background:var(--green-2)} .th-b2{background:var(--ink-2)} .th-b3{background:var(--orange-2)} .th-b4{background:var(--card)}
+.th-tickets{display:flex;gap:10px;flex-wrap:wrap}
+.th-tix{display:flex;flex-direction:column;align-items:center;font-size:28px;filter:grayscale(1);opacity:.45}
+.th-tix.on{filter:none;opacity:1}
+.th-tix b{font-size:12px;letter-spacing:2px;color:var(--text)}
+.th-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:99px;font-weight:700;font-size:18px}
+.th-conf{position:fixed;top:-40px;z-index:65;font-size:30px;pointer-events:none;animation:thfall 2.2s ease-in forwards}
+@keyframes thfall{to{transform:translateY(110vh) rotate(260deg)}}
+.thcard{border:2.5px solid var(--orange);background:var(--orange-2)}
+@media (max-width:620px){.th-controls{grid-template-columns:repeat(2,1fr)}.th-face{font-size:54px}.th-bubble{font-size:19px}}
 .vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
 .camlbl{position:relative;cursor:pointer}
 .camlbl:focus-within{outline:3px solid var(--gold);outline-offset:2px}
@@ -174,11 +227,51 @@ body.print .peek{font-family:var(--f-ui);font-weight:700}
 </head>
 <body>
 <div class="wrap" id="app"></div>
+<div class="wrap" id="theater" hidden>
+  <div class="th-head">
+    <button class="chip" id="th-back" aria-label="Indietro">⬅️</button>
+    <h2 class="th-h2">🎭 Teatro <span id="th-count" class="th-pill"></span></h2>
+    <button class="chip" id="th-slow" aria-pressed="false" aria-label="Voci più lente">🐢</button>
+    <button class="chip" id="th-home">Menu</button>
+  </div>
+  <p class="th-sub"><b id="th-title"></b> · Gloria è <b>Paura</b> 😨</p>
+  <div id="th-list" class="th-list"></div>
+  <div id="th-moment" hidden>
+    <h3 id="th-mtitle" class="th-mtitle"></h3>
+    <div id="th-cast" class="th-cast"></div>
+    <div id="th-stage" class="th-stage">
+      <div id="th-face" class="th-face">🎭</div>
+      <div class="th-bubble-wrap"><div id="th-who" class="th-who"></div><div id="th-bubble" class="th-bubble"></div></div>
+    </div>
+    <div id="th-turn" class="th-turn" hidden>
+      <div id="th-turn-label" class="th-turn-label">Tocca a te!</div>
+      <button id="th-mic" class="th-mic" aria-label="Parla">🎤</button>
+      <div id="th-heard" class="th-heard"></div>
+      <div id="th-result" class="th-result"></div>
+      <div id="th-hint" class="th-hint" hidden></div>
+      <div id="th-judge" class="th-judge" hidden>
+        <button id="th-ok" class="btn">✅ Giusta</button>
+        <button id="th-again" class="btn ghost">🔁 Ancora</button>
+        <button id="th-next" class="btn ghost">⏭️ Avanti</button>
+      </div>
+      <div class="th-small"><button id="th-first" class="th-link">💡 Le prime parole</button><button id="th-skipmic" class="th-link">senza microfono</button></div>
+    </div>
+    <div id="th-status" class="th-status" aria-live="polite"></div>
+    <div id="th-controls" class="th-controls">
+      <button id="th-listen" class="th-btn th-b1"><span>👂</span>Ascolta</button>
+      <button id="th-pieces" class="th-btn th-b2"><span>🧩</span>A pezzi</button>
+      <button id="th-recite" class="th-btn th-b3"><span>🎤</span>Recita</button>
+      <button id="th-stop" class="th-btn th-b4"><span>⏹️</span>Stop</button>
+    </div>
+    <div id="th-tickets" class="th-tickets"></div>
+  </div>
+</div>
 <div id="lock" hidden role="dialog" aria-modal="true" aria-labelledby="locktitle"><div class="lockbox">
   <div class="big">🌟</div>
   <div class="fw" id="locktitle">C'est fini pour aujourd'hui !</div>
   <p class="locktxt">Per oggi hai lavorato abbastanza, brava!<br>Chiama <b>papà</b> o <b>mamma</b>.</p>
   <div class="note" id="locksum"></div>
+  <button class="btn" id="b-lock-th">🎭 Prova il teatro</button>
   <button id="b-parent" class="chip">Solo per papà e mamma</button>
   <div id="pgate" hidden style="display:grid;gap:10px;justify-items:center">
     <span class="note">Per aggiungere tempo risolvi questo calcolo:</span>
@@ -261,7 +354,7 @@ const OBJ_M=['crayon','stylo','livre'], OBJ_F=['trousse','gomme','règle'], COL_
 
 /* ===== STATO ===== */
 const KEY='gloria-fr-v1';
-let S={units:[1,2,3],stats:{},history:[],script:true,slow:false,points:0,seen:0,hw:0,math:{}};
+let S={units:[1,2,3],stats:{},history:[],script:true,slow:false,points:0,seen:0,hw:0,math:{},theater:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) S=Object.assign(S,s);}catch(e){}
 function localSave(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function save(){localSave(); markDirty();}
@@ -547,7 +640,289 @@ document.addEventListener('pointerup',e=>endDrag(e,false));
 document.addEventListener('pointercancel',e=>endDrag(e,true));
 document.addEventListener('click',e=>{const b=e.target.closest('.tile[data-tile]'); if(b&&e.detail===0&&run&&!run.bdone) tapTile(+b.dataset.tile);});
 function peekSentence(){const q=run.qs[run.i],el=$('#peek'); if(!el) return; run.peek=true; el.textContent=q.blocks; setTimeout(()=>{if(el.isConnected) el.textContent=''},3000);}
-function buildTest(){const keep=S.units;S.units=[1,2,3];const qs=[];
+/* ===== TEATRO: Gloria è PAURA in «Il giorno in cui sparirono le parole» =====
+   Ripreso dall'Atelier di Giulia (js/teatro.js) e adattato a quest'app.
+   Copione trascritto dalle foto (pagine 2, 6, 7, 8, 9, 10, 17): solo i momenti in cui parla Paura,
+   con le battute che vengono prima (attacco). N = narratore e indicazioni di scena. */
+const TH_TITLE='Il giorno in cui sparirono le parole', TH_ROLE='PAURA', TH_LEARNED=3, TH_OK=0.7, TH_ALMOST=0.45;
+const TH_CAST={
+  PAURA:{name:'Paura',emoji:'😨',voice:'f',pitch:1.25,rate:0.95},
+  GIOIA:{name:'Gioia',emoji:'😄',voice:'f',pitch:1.45,rate:1.1},
+  RABBIA:{name:'Rabbia',emoji:'😠',voice:'m',pitch:0.7,rate:1.1},
+  TRISTEZZA:{name:'Tristezza',emoji:'😢',voice:'f',pitch:0.85,rate:0.8},
+  VERGOGNA:{name:'Vergogna',emoji:'😳',voice:'f',pitch:1.1,rate:0.85},
+  CORAGGIO:{name:'Coraggio',emoji:'💪',voice:'m',pitch:0.95,rate:0.95},
+  NINA:{name:'Nina',emoji:'👧',voice:'f',pitch:1.2,rate:1.0},
+  TEO:{name:'Teo',emoji:'👦',voice:'f',pitch:1.55,rate:1.0},
+  LIA:{name:'Lia',emoji:'🎨',voice:'f',pitch:1.3,rate:1.0},
+  SAM:{name:'Sam',emoji:'🎸',voice:'m',pitch:1.15,rate:0.95},
+  MARTA:{name:'Marta',emoji:'🧁',voice:'f',pitch:1.05,rate:1.0},
+  ELIA:{name:'Elia',emoji:'🎧',voice:'m',pitch:1.0,rate:1.0},
+  BIANCA:{name:'Bianca',emoji:'🎀',voice:'f',pitch:1.35,rate:0.95},
+  N:{name:'Narratore',emoji:'📖',voice:'f',pitch:1.0,rate:0.95}
+};
+const TH_MOMENTS=[
+ {id:'scena1',title:'Scena 1 — Una festa perfetta',icon:'🎈',lines:[
+  ['NINA','Teo.'],
+  ['TEO','Era una domanda sul programma.'],
+  ['N','Le emozioni entrano nella Piazza delle Parole.'],
+  ['N',"Vedete quei sei personaggi nell'altra parte del palco? Sono Gioia, Paura, Rabbia, Tristezza, Vergogna e Coraggio. Sono le emozioni di Nina. I ragazzi non le vedono e non le sentono; solo noi possiamo ascoltare quello che succede dentro di lei."],
+  ['GIOIA','Guardate! Una festa, le stelle, la musica. Potrebbe essere una giornata bellissima. Io aggiungerei una danza finale. Anzi, due danze. Una per chi sa ballare e una per chi balla male come me.'],
+  ['PAURA','Prima di ballare controllerei le sedie. Una traballa. E se piove? E se non viene nessuno? E se vengono tutti e non ci sono abbastanza bicchieri?'],
+  ['RABBIA',"La vera domanda è: perché Nina non ascolta Lia? Quell'idea delle stelle era bella. Lia ha parlato e Nina è passata oltre."]]},
+ {id:'scena3a',title:'Scena 3 — Il cartellone strappato',icon:'✂️',lines:[
+  ['NINA','Lo sai mai che cosa stai facendo? Ti avevo chiesto soltanto di aiutarmi!'],
+  ['N','Teo lascia il pezzo che tiene e si allontana.'],
+  ['N','Teo non voleva rovinare niente. Eppure adesso si sente di troppo. Il cartellone si può incollare; ma per dimenticare quelle parole servirà qualcosa di diverso.'],
+  ['RABBIA',"Finalmente! C'è un problema e dobbiamo dirlo forte. Il cartellone è strappato, il tempo passa e nessuno sembra capire quanto lavoro ha fatto Nina."],
+  ['PAURA','Però Teo potrebbe pensare che Nina sia arrabbiata con lui, invece che con il cartellone.'],
+  ['RABBIA','In questo momento Nina è arrabbiata anche con lui.']]},
+ {id:'scena3b',title:'Scena 3 — Tutti insieme',icon:'🗣️',lines:[
+  ['NINA','Pensavo di farti una sorpresa.'],
+  ['SAM','Sì è stata una sorpresa infatti, una molto brutta.'],
+  ['N','Sam esce. Le emozioni cominciano a parlare tutte insieme.'],
+  ['GIOIA','Si può ancora sistemare!'],
+  ['PAURA','Mancano poche ore!'],
+  ['RABBIA','Dovevano capire quanto conta questa festa per Nina!'],
+  ['VERGOGNA','Non andare a cercarli!']]},
+ {id:'scena4a',title:'Scena 4 — La sedia vuota',icon:'🪑',lines:[
+  ['N',"Luce sulle emozioni. Al centro, una sedia vuota rappresenta il posto in cui ciascuna aspetta il proprio turno per parlare."],
+  ['RABBIA','Io non aspetto più su quella sedia. Quando qualcosa va storto, arrivate tutti a dirmi di abbassare la voce. Però grazie a me Nina capisce che una cosa per lei è importante.'],
+  ['TRISTEZZA','È vero. Puoi dirglielo. Ma le parole che ha usato con Teo gli hanno fatto male.'],
+  ['RABBIA','Se devo controllare ogni parola, quando riesco a parlare?'],
+  ['CORAGGIO','Puoi fermarti un istante prima di scegliere a chi rivolgerla. Un istante basta per dire «sono furiosa perché il cartellone si è rotto» invece di «tu non sai mai che cosa fai».'],
+  ['PAURA','Io avevo avvertito tutti. La sedia, il tempo, le scatole. Nessuno mi ascolta finché non succede qualcosa. Poi mi accusano di rovinare il divertimento.'],
+  ['GIOIA','Io non ti accuso! Solo che, quando cominci con «e se piove» e finisci con «e se finisce il mondo», mi viene difficile organizzare una festa.'],
+  ['PAURA','Non ho detto che finisce il mondo. Ho detto che potrebbero finire i bicchieri.'],
+  ['CORAGGIO','Sono due cose diverse. I bicchieri potremmo contarli.'],
+  ['PAURA','Grazie. Finalmente una domanda utile.'],
+  ['GIOIA','Bene, contiamo i bicchieri, aggiustiamo il cartellone e richiamiamo tutti. Fatto!']]},
+ {id:'scena4b',title:'Scena 4 — Perché deve essere perfetta?',icon:'🤔',lines:[
+  ['CORAGGIO','Mi interessa una cosa. Perché questa festa deve essere perfetta?'],
+  ['N','Tutti guardano Nina, seduta accanto al cartellone.'],
+  ['NINA',"L'anno scorso è venuta poca gente. Avevamo preparato dei giochi e nessuno voleva partecipare. Ho sentito due persone dire che era una festa noiosa. Quest'anno ho chiesto io di organizzarla. Volevo dimostrare che potevo farcela."],
+  ['PAURA','Ecco. Teme che succeda di nuovo.'],
+  ['TRISTEZZA',"Quelle parole dell'anno scorso le sono rimaste addosso."]]},
+ {id:'scena4c',title:'Scena 4 — E se non tornano?',icon:'🚪',lines:[
+  ['RABBIA','Nina voleva aiuto, ma nessuno poteva decidere niente.'],
+  ['VERGOGNA','Adesso dovrà guardare in faccia anche loro. Io preferirei riordinare i bicchieri per tre ore.'],
+  ['CORAGGIO','Possiamo cominciare da una frase vera. Non deve essere un discorso perfetto.'],
+  ['PAURA','E se non tornano?'],
+  ['CORAGGIO','Non possiamo saperlo prima di provare.'],
+  ['GIOIA','Allora niente danza di emergenza?'],
+  ['TRISTEZZA','Prima le parole. La danza può aspettare.']]},
+ {id:'finale',title:'Finale — La festa',icon:'🌟',lines:[
+  ['MARTA',"La prossima festa la pensiamo insieme dall'inizio."],
+  ['ELIA','E mettiamo la musica in un posto solo.'],
+  ['TEO','Non fare promesse impossibili!'],
+  ['N','Le emozioni avanzano una alla volta.'],
+  ['N','Mentre i ragazzi fanno festa, ascoltiamo ancora le sei emozioni. Non sono sparite e non devono sparire. Nina ha imparato a sentirle senza lasciare che parlino tutte insieme.'],
+  ['GIOIA','Oggi ho riso. Non tutto il tempo, e non sempre per le ragioni che immaginavo.'],
+  ['PAURA','Io ho fatto controllare il portico prima che arrivasse la pioggia. Era una precauzione utile.'],
+  ['RABBIA','Io ho mostrato a Nina che la festa le stava a cuore. La prossima volta proverò a scegliere parole che spieghino il problema.']]}
+];
+// id fisso per ogni battuta di Paura (es. "scena4a-2"), usato per salvare i progressi
+TH_MOMENTS.forEach(m=>{let k=0; m.lines=m.lines.map(([who,text])=>({who,text,id:who===TH_ROLE?`${m.id}-${++k}`:null}));});
+const TH_LINES=TH_MOMENTS.flatMap(m=>m.lines.filter(l=>l.id));
+
+let thRun=0, thSlow=false, thCur=null, thWaiters=[], thVoices=[], thPendingMic=null, thPendingJudge=null, thMicExplained=false, thLastJudge=null;
+/* --- Voci (italiane del tablet) --- */
+function thLoadVoices(){if(!('speechSynthesis' in window)) return; try{thVoices=speechSynthesis.getVoices().filter(v=>(v.lang||'').toLowerCase().startsWith('it'))}catch(e){thVoices=[]}}
+const TH_F=/alice|federica|paola|emma|elsa|silvia|chiara|martina|isabella|sara|giulia|marta|alessandra|elena|anna/i;
+const TH_M=/luca|diego|cosimo|giorgio|enrico|roberto|marco|paolo|andrea|carlo|matteo/i;
+function thVoiceFor(who){if(!thVoices.length) thLoadVoices(); if(!thVoices.length) return null;
+  const c=TH_CAST[who], want=c.voice==='m'?thVoices.filter(v=>TH_M.test(v.name)):thVoices.filter(v=>TH_F.test(v.name)), pool=want.length?want:thVoices;
+  return pool[Object.keys(TH_CAST).indexOf(who)%pool.length];}
+// Safari su iPad: ogni frase resta in memoria finché finisce, altrimenti "onend" può non arrivare
+const thAlive=new Set(); let thMissed=0;
+function thStatus(m){const el=$('#th-status'); if(el) el.textContent=m;}
+function thSay(who,text,my){return new Promise(resolve=>{
+  if(my!==thRun||!('speechSynthesis' in window)) return resolve();
+  const c=TH_CAST[who]; thStatus(`🔊 ${c.name} parla…`);
+  const u=new SpeechSynthesisUtterance(text.replace(/[«»]/g,'')); u.lang='it-IT';
+  const v=thVoiceFor(who); if(v){try{u.voice=v}catch(e){}}
+  u.pitch=c.pitch; u.rate=c.rate*(thSlow?0.8:1);
+  let done=false;
+  const finish=fromTimer=>{if(done) return; done=true; thAlive.delete(u);
+    if(fromTimer===true){ if(++thMissed>=2){try{speechSynthesis.cancel()}catch(e){} thMissed=0;} } else thMissed=0;
+    resolve();};
+  u.onend=()=>finish(false); u.onerror=()=>finish(false);
+  thAlive.add(u);
+  setTimeout(()=>finish(true),2500+text.length*(thSlow?120:95));
+  try{if(speechSynthesis.paused) speechSynthesis.resume()}catch(e){}
+  speechSynthesis.speak(u);});}
+const thPause=(ms,my)=>new Promise(r=>setTimeout(r,my===thRun?ms:0));
+/* --- Microfono --- */
+const TH_SR=window.SpeechRecognition||window.webkitSpeechRecognition, thCanListen=!!TH_SR;
+const TH_NUM={0:'zero',1:'uno',2:'due',3:'tre',4:'quattro',5:'cinque',6:'sei',7:'sette',8:'otto',9:'nove',10:'dieci'};
+function thWords(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\d+/g,d=>TH_NUM[d]||d).replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean)}
+/** parte delle parole attese dette nell'ordine giusto (0-1), con LCS sulle parole */
+function thSimilarity(expected,heard){const a=thWords(expected),b=thWords(heard); if(!a.length) return 0;
+  const dp=Array.from({length:a.length+1},()=>new Array(b.length+1).fill(0));
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+  return dp[a.length][b.length]/a.length;}
+/** va chiamato direttamente dal tocco sul microfono (Safari lo richiede) */
+function thListen(expected,my){return new Promise(resolve=>{
+  if(!TH_SR) return resolve({text:'',score:null,error:'non-supportato'});
+  const rec=new TH_SR(); thStatus('👂 Ti ascolto… parla adesso');
+  rec.lang='it-IT'; rec.interimResults=true; rec.continuous=false; rec.maxAlternatives=3;
+  let best='',bestScore=0,finished=false,t=null;
+  const end=error=>{if(finished) return; finished=true; clearTimeout(t); try{rec.abort()}catch(e){}
+    if(error&&error!=='no-speech'&&error!=='aborted') thStatus(`⚠️ Microfono: ${error}`);
+    setTimeout(()=>resolve({text:best,score:best?bestScore:0,error}),450);};
+  rec.onresult=e=>{let joined=''; for(let i=0;i<e.results.length;i++) joined+=' '+e.results[i][0].transcript;
+    const alts=[joined],last=e.results[e.results.length-1];
+    for(let k=1;k<last.length;k++) alts.push(joined.replace(last[0].transcript,last[k].transcript));
+    for(const x of alts){const s=thSimilarity(expected,x); if(s>=bestScore){bestScore=s; best=x.trim();}}
+    $('#th-heard').textContent=best; if(bestScore>=0.95) end();};
+  rec.onerror=e=>end(e.error); rec.onend=()=>end();
+  t=setTimeout(()=>end(),4000+thWords(expected).length*700);
+  try{rec.start()}catch(e){end('start')}
+  if(my!==thRun) end('stop');});}
+/* --- Progressi (salvati con il resto dei dati, anche online) --- */
+const thProg=()=>(S.theater=S.theater||{});
+const thLearned=id=>(thProg()[id]||0)>=TH_LEARNED;
+function thAddSuccess(id){const p=thProg(),was=thLearned(id); p[id]=(p[id]||0)+1; save(); return !was&&thLearned(id);}
+/* --- Piccoli effetti --- */
+function thToast(msg,ms=2200){const d=document.createElement('div'); d.className='th-toast'; d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),ms);}
+function thConfetti(list){for(let i=0;i<22;i++){const s=document.createElement('span'); s.className='th-conf'; s.textContent=list[i%list.length];
+  s.style.left=(Math.random()*96)+'vw'; s.style.animationDelay=(Math.random()*.5)+'s'; document.body.appendChild(s); setTimeout(()=>s.remove(),2600);}}
+let thAudio=null;
+function thChime(freqs){try{thAudio=thAudio||new (window.AudioContext||window.webkitAudioContext)(); const t0=thAudio.currentTime;
+  freqs.forEach((f,i)=>{const o=thAudio.createOscillator(),g=thAudio.createGain(); o.frequency.value=f; o.type='sine';
+    g.gain.setValueAtTime(0.0001,t0+i*.12); g.gain.exponentialRampToValueAtTime(0.2,t0+i*.12+.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*.12+.35);
+    o.connect(g); g.connect(thAudio.destination); o.start(t0+i*.12); o.stop(t0+i*.12+.4);});}catch(e){}}
+/* --- Interfaccia --- */
+function thStop(){thRun++; thStatus(''); thPendingMic=null; thPendingJudge=null;
+  try{speechSynthesis.cancel()}catch(e){}
+  thWaiters.forEach(w=>w(null)); thWaiters=[];
+  const turn=$('#th-turn'); if(turn) turn.hidden=true;
+  thSetSpeaker(null); const c=$('#th-controls'); if(c) c.classList.remove('busy');}
+function thSetSpeaker(line){const face=$('#th-face'),bubble=$('#th-bubble'),who=$('#th-who'),stage=$('#th-stage'); if(!face) return;
+  document.querySelectorAll('#th-cast .th-actor').forEach(el=>el.classList.toggle('on',!!line&&el.dataset.who===line.who));
+  if(!line){face.textContent='🎭'; who.textContent=''; bubble.textContent=''; stage.className='th-stage'; return;}
+  const c=TH_CAST[line.who]; face.textContent=c.emoji; who.textContent=line.who===TH_ROLE?'Tu! (Paura)':c.name; bubble.textContent=line.text;
+  stage.className='th-stage'+(line.who===TH_ROLE?' me':line.who==='N'?' narr':'');}
+function thTotal(){return TH_LINES.filter(l=>thLearned(l.id)).length}
+function thRenderList(){
+  $('#th-count').textContent=`🎟️ ${thTotal()} / ${TH_LINES.length}`;
+  $('#th-list').innerHTML=TH_MOMENTS.map(m=>{const mine=m.lines.filter(l=>l.id);
+    return `<button class="th-card" data-moment="${m.id}"><span class="th-card-icon">${m.icon}</span><span class="th-card-title">${esc(m.title)}</span>
+      <span class="th-card-tix">${mine.map(l=>`<i class="${thLearned(l.id)?'on':''}">🎟️</i>`).join('')}</span></button>`;}).join('')
+    +`<button class="th-card th-all" data-moment="tutto"><span class="th-card-icon">🎭</span><span class="th-card-title">Tutte le battute di Paura, una dopo l'altra</span><span class="th-card-tix">${thTotal()} / ${TH_LINES.length} 🎟️</span></button>`;
+  $('#th-list').hidden=false; $('#th-moment').hidden=true;}
+function thOpenMoment(id){thStop();
+  thCur=id==='tutto'?{id:'tutto',title:'Tutte le battute di Paura',icon:'🎭',lines:TH_MOMENTS.flatMap(m=>m.lines)}:TH_MOMENTS.find(m=>m.id===id);
+  $('#th-mtitle').textContent=`${thCur.icon} ${thCur.title}`;
+  const who=[...new Set(thCur.lines.map(l=>l.who).filter(w=>w!=='N'))];
+  $('#th-cast').innerHTML=who.map(w=>`<span class="th-actor ${w===TH_ROLE?'me':''}" data-who="${w}">${TH_CAST[w].emoji}<small>${w===TH_ROLE?'Tu!':TH_CAST[w].name}</small></span>`).join('');
+  thRenderTickets(); thSetSpeaker(null);
+  $('#th-list').hidden=true; $('#th-moment').hidden=false; window.scrollTo(0,0);}
+function thRenderTickets(){const mine=thCur.lines.filter(l=>l.id);
+  $('#th-tickets').innerHTML=mine.map(l=>{const n=thProg()[l.id]||0;
+    return `<span class="th-tix ${thLearned(l.id)?'on':''}" title="${esc(l.text)}">🎟️<b>${'●'.repeat(Math.min(n,TH_LEARNED))}${'○'.repeat(Math.max(0,TH_LEARNED-n))}</b></span>`;}).join('');
+  $('#th-count').textContent=`🎟️ ${thTotal()} / ${TH_LINES.length}`;}
+/* 1) Ascolta: tutta la scena */
+async function thPlayListen(){thStop(); const my=thRun; $('#th-controls').classList.add('busy');
+  for(const line of thCur.lines){if(my!==thRun) return; thSetSpeaker(line); await thSay(line.who,line.text,my); await thPause(line.who===TH_ROLE?700:350,my);}
+  if(my===thRun){thSetSpeaker(null); thStatus(''); $('#th-controls').classList.remove('busy');}}
+/** turno di Gloria per un testo (battuta intera o pezzo): true se è andata bene */
+async function thMyTurn(text,my,label='Tocca a te!'){
+  const turn=$('#th-turn'); turn.hidden=false; try{turn.scrollIntoView({behavior:'smooth',block:'center'})}catch(e){}
+  $('#th-turn-label').textContent=label; $('#th-heard').textContent=''; $('#th-result').textContent='';
+  $('#th-judge').hidden=true; $('#th-mic').hidden=false; $('#th-mic').classList.add('pulse');
+  $('#th-hint').hidden=true; $('#th-skipmic').hidden=!thCanListen; $('#th-first').hidden=false; $('#th-first').dataset.text=text;
+  thStatus(thCanListen?'🎤 Tocca il microfono e parla!':'Di\' la battuta, poi tocca 🎤');
+  if(!thMicExplained){thMicExplained=true; await thSay('N',"Tocca il microfono e di' la tua battuta!",my);}
+  const tap=await new Promise(resolve=>{thPendingMic={resolve,text,my}; thWaiters.push(()=>resolve(null));});
+  if(tap===null||my!==thRun) return false;
+  $('#th-mic').classList.remove('pulse'); $('#th-first').hidden=true;
+  let verdict;
+  if(tap.score===null) verdict='manual';
+  else if(tap.score>=TH_OK) verdict='ok';
+  else if(tap.score>=TH_ALMOST) verdict='almost';
+  else verdict=tap.error==='no-speech'||!tap.text?'silent':'retry';
+  const msg={ok:'Bravissima! 🌟',almost:'Quasi! Ascolta ancora…',retry:'Riproviamo insieme…',silent:'Non ti ho sentita… ascolta:',manual:"Ascolta com'è:"}[verdict];
+  $('#th-result').textContent=msg; $('#th-mic').hidden=true;
+  if(verdict==='ok'){thChime([660,880,1100]); await thSay('N','Bravissima!',my);}
+  else{await thSay('N',msg.replace(/[^\p{L} '.,!…]/gu,''),my);
+    $('#th-hint').textContent=text; $('#th-hint').hidden=false;
+    thSetSpeaker({who:TH_ROLE,text}); await thSay(TH_ROLE,text,my);}
+  if(my!==thRun) return false;
+  // il genitore può sempre correggere; se è andata bene si prosegue da soli dopo 1,8 secondi
+  $('#th-judge').hidden=false; thStatus('');
+  const judged=new Promise(resolve=>{thPendingJudge=resolve; thWaiters.push(()=>resolve(null));});
+  const j=verdict==='ok'?await Promise.race([judged,new Promise(r=>setTimeout(()=>r('ok'),1800))]):await judged;
+  thPendingJudge=null; turn.hidden=true;
+  if(j===null||my!==thRun) return false;
+  thLastJudge=j; return j==='ok';}
+async function thCueBefore(lines,idx,my,howMany=2){const cue=[];
+  for(let i=idx-1;i>=0&&cue.length<howMany;i--){if(lines[i].who===TH_ROLE) break; cue.unshift(lines[i]);}
+  for(const l of cue){thSetSpeaker(l); await thSay(l.who,l.text,my); await thPause(250,my);}}
+async function thCelebrate(l){const fresh=thAddSuccess(l.id); thRenderTickets();
+  if(fresh){thConfetti(['🎟️','⭐','🎭','✨']); thToast('🎟️ Battuta imparata!',3000);}}
+async function thSceneEnd(my){if(my!==thRun) return; thSetSpeaker(null); $('#th-controls').classList.remove('busy');
+  await thSay('N','Fine della scena. Applausi!',my); thStatus(''); thConfetti(['👏','🎭','⭐','🎟️','✨']);}
+/* 3) Recita: le 2 battute prima, poi tocca a Gloria */
+async function thPlayRecite(){thStop(); const my=thRun; $('#th-controls').classList.add('busy'); const lines=thCur.lines;
+  for(let i=0;i<lines.length;i++){if(my!==thRun) return; const l=lines[i]; if(l.who!==TH_ROLE) continue;
+    await thCueBefore(lines,i,my); if(my!==thRun) return;
+    thSetSpeaker({who:TH_ROLE,text:'…'});
+    let ok=await thMyTurn(l.text,my);
+    while(!ok&&my===thRun&&thLastJudge==='again') ok=await thMyTurn(l.text,my,'Ancora una volta!');
+    if(my!==thRun) return; if(ok) await thCelebrate(l);}
+  await thSceneEnd(my);}
+/* 2) A pezzi: la battuta divisa nelle sue frasi; i pezzi di 1-2 parole si uniscono a quello dopo */
+function thPieces(text){const parts=(text.match(/[^.!?;:]+[.!?;:…]*/g)||[text]).map(s=>s.trim()).filter(Boolean),out=[]; let carry='';
+  for(const p of parts){const piece=carry?`${carry} ${p}`:p; if(piece.split(' ').length<3){carry=piece; continue;} out.push(piece); carry='';}
+  if(carry) out.length?(out[out.length-1]+=' '+carry):out.push(carry);
+  return out;}
+async function thPlayPieces(){thStop(); const my=thRun; $('#th-controls').classList.add('busy'); const lines=thCur.lines;
+  for(let i=0;i<lines.length;i++){if(my!==thRun) return; const l=lines[i];
+    if(l.who!==TH_ROLE){thSetSpeaker(l); await thSay(l.who,l.text,my); await thPause(300,my); continue;}
+    const parts=thPieces(l.text);
+    await thSay('N',parts.length>1?'Tocca a te! Impariamo la battuta a pezzi.':'Tocca a te! Ascolta e ripeti.',my);
+    for(const p of parts){if(my!==thRun) return;
+      thSetSpeaker({who:TH_ROLE,text:p}); await thSay(TH_ROLE,p,my);
+      let ok=await thMyTurn(p,my,'Ripeti!');
+      while(!ok&&my===thRun&&thLastJudge==='again'){thSetSpeaker({who:TH_ROLE,text:p}); await thSay(TH_ROLE,p,my); ok=await thMyTurn(p,my,'Ancora!');}}
+    if(my!==thRun) return;
+    const cue=[...lines.slice(0,i)].reverse().find(x=>x.who!==TH_ROLE&&x.who!=='N')||lines[i-1];
+    await thSay('N','Adesso tutta da sola, come alla recita!',my);
+    let ok=false;
+    do{ if(cue){thSetSpeaker(cue); await thSay(cue.who,cue.text,my); await thPause(250,my);}
+      if(my!==thRun) return;
+      thSetSpeaker({who:TH_ROLE,text:'…'});
+      ok=await thMyTurn(l.text,my,thLastJudge==='again'?'Ancora una volta!':'Tocca a te!');
+    }while(!ok&&my===thRun&&thLastJudge==='again');
+    if(my!==thRun) return; if(ok) await thCelebrate(l);}
+  await thSceneEnd(my);}
+/* --- Apertura e chiusura del teatro (il tempo qui NON conta nei 20 minuti) --- */
+function openTheater(){try{speechSynthesis.cancel()}catch(e){} screen='theater'; $('#app').hidden=true; $('#theater').hidden=false; thStop(); thRenderList(); window.scrollTo(0,0); updTimer();}
+function leaveTheater(){thStop(); $('#theater').hidden=true; $('#app').hidden=false; screen='home'; render(); window.scrollTo(0,0); if(T().used>0&&left()<=0) showLock();}
+function initTheater(){
+  if('speechSynthesis' in window){thLoadVoices(); try{speechSynthesis.addEventListener('voiceschanged',thLoadVoices)}catch(e){}}
+  $('#th-title').textContent=TH_TITLE;
+  $('#th-list').addEventListener('click',e=>{const b=e.target.closest('[data-moment]'); if(b) thOpenMoment(b.dataset.moment);});
+  $('#th-back').onclick=()=>{ if(!$('#th-moment').hidden){thStop(); thRenderList();} else leaveTheater(); };
+  $('#th-home').onclick=leaveTheater;
+  $('#th-listen').onclick=thPlayListen; $('#th-recite').onclick=thPlayRecite; $('#th-pieces').onclick=thPlayPieces;
+  $('#th-stop').onclick=()=>{thStop(); try{speechSynthesis.cancel()}catch(e){}};
+  window.addEventListener('error',e=>{if(screen==='theater') thStatus('⚠️ '+e.message);});
+  window.addEventListener('unhandledrejection',e=>{if(screen==='theater') thStatus('⚠️ '+((e.reason&&e.reason.message)||e.reason));});
+  $('#th-slow').onclick=()=>{thSlow=!thSlow; $('#th-slow').setAttribute('aria-pressed',thSlow); thToast(thSlow?'🐢 Voci più lente':'🐇 Voci normali');};
+  // microfono: il riconoscimento DEVE partire dentro il tocco
+  $('#th-mic').onclick=async()=>{if(!thPendingMic) return; const pm=thPendingMic; thPendingMic=null;
+    $('#th-mic').classList.add('listening'); $('#th-result').textContent=thCanListen?'👂 Ti ascolto…':'';
+    const r=thCanListen?await thListen(pm.text,pm.my):{text:'',score:null};
+    $('#th-mic').classList.remove('listening'); pm.resolve(r);};
+  $('#th-skipmic').onclick=()=>{if(!thPendingMic) return; const pm=thPendingMic; thPendingMic=null; pm.resolve({text:'',score:null});};
+  $('#th-first').onclick=()=>{const w=String($('#th-first').dataset.text||'').split(/\s+/); $('#th-hint').textContent=w.slice(0,3).join(' ')+(w.length>3?' …':''); $('#th-hint').hidden=false;};
+  $('#th-ok').onclick=()=>{thLastJudge='ok'; if(thPendingJudge) thPendingJudge('ok'); thPendingJudge=null;};
+  $('#th-again').onclick=()=>{thLastJudge='again'; if(thPendingJudge) thPendingJudge('again'); thPendingJudge=null;};
+  $('#th-next').onclick=()=>{thLastJudge='next'; if(thPendingJudge) thPendingJudge('next'); thPendingJudge=null;};}
+function buildTest(){
+const keep=S.units;S.units=[1,2,3];const qs=[];
   [['voc','Partie 1 · Vocabulaire'],['eco','Partie 2 · Écoute'],['ecr','Partie 3 · Écriture']].forEach(([k,sec])=>build(k,4).forEach(q=>{q.sec=sec;qs.push(q)}));
   S.units=keep;return qs;}
 function render(){
@@ -574,6 +949,8 @@ function homeView(){
     <section style="display:grid;gap:10px"><h2>Scegli la scheda</h2><div class="cards">
     ${['voc','eco','ecr'].map(k=>[k,NAMES[k]]).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr">${n[1]}</span><span class="it">${n[2]} · 8 domande</span></button>`).join('')}
     </div></section>
+    <section style="display:grid;gap:10px"><h2>Teatro · la recita</h2><div class="cards two">
+    <button class="scheda thcard testcard" id="b-theater"><span class="ico">🎭</span><span class="fr" style="font-family:var(--f-ui);font-weight:700">Il giorno in cui sparirono le parole</span><span class="it">Impara le battute di Paura 😨 · 🎟️ ${thTotal()} / ${TH_LINES.length} biglietti · non conta nel tempo</span></button></div></section>
     <section style="display:grid;gap:10px"><h2>Matematica · calcoli veloci</h2><div class="cards two">
     ${MATHK.map(k=>[k,NAMES[k]]).map(([k,n])=>`<button class="scheda" data-start="${k}"><span class="ico">${n[0]}</span><span class="fr" style="font-family:var(--f-ui);font-weight:700">${n[1]}</span><span class="it">${n[2]} · 10 calcoli · ⚡ bonus se rispondi in 5 secondi</span></button>`).join('')}
     </div></section>${noVoice}<p class="note" id="cloudline">${cloudLine()}</p>`;
@@ -646,7 +1023,7 @@ function progView(){
    ${(()=>{const m=Object.entries(S.math||{}).map(([k,v])=>({k,...v})).filter(x=>(x.ko||0)+(x.slow||0)>0).sort((a,b)=>((b.ko||0)*2+(b.slow||0))-((a.ko||0)*2+(a.slow||0))).slice(0,10);
      return `<div><h2>Calcoli da allenare</h2>${m.length?`<div style="overflow-x:auto"><table><tr><th>Calcolo</th><th>Giusti</th><th>Sbagliati</th><th>Lenti</th></tr>${m.map(x=>`<tr><td>${esc(x.k)}</td><td>${x.ok||0}</td><td>${x.ko||0}</td><td>${x.slow||0}</td></tr>`).join('')}</table></div><p class="note">Questi calcoli tornano più spesso nelle schede di matematica.</p>`:'<p class="note">Ancora nessun calcolo da allenare.</p>'}</div>`})()}
    <div style="display:grid;gap:8px"><h2>Salva / ripristina (JSON)</h2><p class="note">I progressi restano su questo tablet. Per un backup scarica il file (o copia il testo); per ripristinare scegli il file o incolla il testo qui sotto.</p>
-   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0,hw:S.hw||0,byDev:S.byDev,hwBy:S.hwBy,math:S.math}))}</textarea>
+   <textarea id="exp" readonly>${esc(JSON.stringify({stats:S.stats,history:S.history,units:S.units,points:S.points||0,seen:S.seen||0,hw:S.hw||0,byDev:S.byDev,hwBy:S.hwBy,math:S.math,theater:S.theater}))}</textarea>
    <div class="row"><button class="btn" id="b-dl">Scarica backup</button><button class="btn ghost" id="b-copy">Copia</button><span class="note" id="copymsg"></span></div>
    <textarea id="imp" placeholder="Incolla qui un backup JSON…"></textarea>
    <div class="row"><input type="file" id="file" accept=".json,application/json"><button class="btn" id="b-imp">Importa</button></div><span class="note" id="impmsg"></span>
@@ -695,7 +1072,7 @@ function next(){
 function alertBox(msg){const w=document.createElement('div');w.className='warn';w.textContent=msg;$('#app').appendChild(w);setTimeout(()=>w.remove(),3500)}
 function doImport(txt){
   try{const o=JSON.parse(txt); if(typeof o!=='object'||!o) throw 0;
-    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(o.byDev&&typeof o.byDev==='object')S.byDev=o.byDev; else if(typeof o.points==='number')S.byDev={[DEV]:o.points}; if(o.hwBy&&typeof o.hwBy==='object')S.hwBy=o.hwBy; else if(typeof o.hw==='number')S.hwBy={[DEV]:o.hw}; if(typeof o.seen==='number')S.seen=o.seen; if(o.math&&typeof o.math==='object')S.math=o.math; recalc();
+    if(o.stats)S.stats=o.stats; if(Array.isArray(o.history))S.history=o.history; if(Array.isArray(o.units)&&o.units.length)S.units=o.units; if(o.byDev&&typeof o.byDev==='object')S.byDev=o.byDev; else if(typeof o.points==='number')S.byDev={[DEV]:o.points}; if(o.hwBy&&typeof o.hwBy==='object')S.hwBy=o.hwBy; else if(typeof o.hw==='number')S.hwBy={[DEV]:o.hw}; if(typeof o.seen==='number')S.seen=o.seen; if(o.math&&typeof o.math==='object')S.math=o.math; if(o.theater&&typeof o.theater==='object')S.theater=o.theater; recalc();
     save(); render(); $('#impmsg').textContent='Backup importato ✔';
   }catch(e){$('#impmsg').textContent='Il testo non è un backup valido: incolla tutto il JSON copiato prima.'}
 }
@@ -706,6 +1083,7 @@ function bind(){
   document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>answerMC(+b.dataset.opt));
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const i=$('#in'),s=i.selectionStart??i.value.length,e=i.selectionEnd??s;i.value=i.value.slice(0,s)+b.dataset.k+i.value.slice(e);i.focus();i.setSelectionRange(s+1,s+1)});
   bindCloud();
+  const bth=$('#b-theater'); if(bth) bth.onclick=openTheater;
   const bc2=$('#b-bcheck'); if(bc2) bc2.onclick=checkBlocks;
   const bh=$('#b-help'); if(bh) bh.onclick=helpBlocks;
   const pk=$('#b-peek'); if(pk) pk.onclick=peekSentence;
@@ -731,7 +1109,7 @@ function bind(){
   const dl=$('#b-dl'); if(dl) dl.onclick=()=>{try{const b=new Blob([$('#exp').value],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup-francais-gloria-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();$('#copymsg').textContent='Backup scaricato ✔'}catch(e){$('#copymsg').textContent='Download non riuscito: usa Copia.'}};
   const bi=$('#b-imp'); if(bi) bi.onclick=()=>doImport($('#imp').value);
   const fi=$('#file'); if(fi) fi.onchange=()=>{const r=new FileReader();r.onload=()=>doImport(r.result);if(fi.files[0])r.readAsText(fi.files[0])};
-  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.math={};S.history=[];S.byDev={};S.hwBy={};S.points=0;S.seen=0;S.hw=0;localSave();cloudReset();resetArm=false;render()};
+  const rs=$('#b-reset'); if(rs) rs.onclick=()=>{if(!resetArm){resetArm=true;render();return} S.stats={};S.math={};S.theater={};S.history=[];S.byDev={};S.hwBy={};S.points=0;S.seen=0;S.hw=0;localSave();cloudReset();resetArm=false;render()};
 }
 /* ===== TIMER: 15 minuti al giorno ===== */
 const LIMIT=20*60*1000;
@@ -746,7 +1124,7 @@ function updTimer(){const b=$('#b-timer'); if(!b) return; const t=T(), l=left();
   b.textContent=!t.run&&l>0?'▶ Inizia · '+fmt(l):l>0?'⏱ '+fmt(l):'⏱ 0:00';
   b.setAttribute('aria-label',t.run?'Tempo rimasto '+fmt(l):'Inizia il timer');}
 function tick(){const t=T();
-  if(t.run&&!document.hidden){const now=Date.now(); if(lastTick) t.used+=now-lastTick; lastTick=now;} else lastTick=null;
+  if(t.run&&!document.hidden&&screen!=='theater'){const now=Date.now(); if(lastTick) t.used+=now-lastTick; lastTick=now;} else lastTick=null;
   if(t.run&&left()<=0){t.run=false; save(); showLock();}
   else if(t.run) save();
   updTimer();}
@@ -780,11 +1158,12 @@ async function initCloud(){
   }catch(e){FB.state='na'; cloudUI();}
 }
 function markDirty(){dirty=true; if(!pushT&&FB.user) pushT=setTimeout(()=>{pushT=null; if(dirty) cloudSync();},20000);}
-function cloudPayload(){return {byDev:S.byDev,hwBy:S.hwBy,seen:S.seen||0,stats:S.stats,math:S.math||{},history:S.history.slice(-300),t:S.t||null,units:S.units}}
+function cloudPayload(){return {byDev:S.byDev,hwBy:S.hwBy,seen:S.seen||0,stats:S.stats,math:S.math||{},theater:S.theater||{},history:S.history.slice(-300),t:S.t||null,units:S.units}}
 const hOrd=h=>{const m=String(h.d).match(/(\d+)\.(\d+)\.(\d+)\D+(\d+):(\d+)/);return m?+(m[3]+m[2].padStart(2,'0')+m[1].padStart(2,'0')+m[4].padStart(2,'0')+m[5]):0};
 function mergeInto(r){if(!r||typeof r!=='object') return;
   const mx=(a,b)=>{const o={...a};for(const k in (b||{})) o[k]=Math.max(+o[k]||0,+b[k]||0);return o};
   S.byDev=mx(S.byDev,r.byDev); S.hwBy=mx(S.hwBy,r.hwBy); S.seen=Math.max(S.seen||0,+r.seen||0);
+  S.theater=S.theater||{}; for(const k in (r.theater||{})) S.theater[k]=Math.max(+S.theater[k]||0,+r.theater[k]||0);
   S.math=S.math||{}; for(const k in (r.math||{})){const a=S.math[k]||{ok:0,ko:0,slow:0},b=r.math[k]||{};S.math[k]={ok:Math.max(a.ok||0,+b.ok||0),ko:Math.max(a.ko||0,+b.ko||0),slow:Math.max(a.slow||0,+b.slow||0)}}
   for(const k in (r.stats||{})){const a=S.stats[k]||{ok:0,ko:0},b=r.stats[k]||{};S.stats[k]={ok:Math.max(a.ok,+b.ok||0),ko:Math.max(a.ko,+b.ko||0)}}
   const have=new Set(S.history.map(h=>[h.d,h.k,h.s,h.t].join('|')));
@@ -799,7 +1178,7 @@ async function cloudSync(){if(!fdb||!FB.user) return; if(syncing) return syncing
       tx.set(ref,{data:JSON.stringify(cloudPayload()),updated:firebase.firestore.FieldValue.serverTimestamp(),device:DEV});});
     dirty=false; FB.last=new Date(); FB.err=''; localSave();
   }catch(e){FB.err=e&&e.code==='permission-denied'?'Permesso negato: controlla le regole di Firestore.':e&&e.code==='unavailable'?'Senza internet: salvo appena torna la connessione.':'Salvataggio online non riuscito, riprovo più tardi.';}
-  syncing=null; cloudUI(); if(screen!=='quiz') render(); updTimer();})();
+  syncing=null; cloudUI(); if(screen!=='quiz'&&screen!=='theater') render(); updTimer();})();
   return syncing;}
 async function cloudReset(){if(!fdb||!FB.user) return; try{await fdb.collection('progress').doc(FB.user.uid).set({data:JSON.stringify(cloudPayload()),updated:firebase.firestore.FieldValue.serverTimestamp(),device:DEV}); FB.last=new Date();}catch(e){} cloudUI();}
 function cloudLine(){return FB.state==='on'?'☁️ Progressi salvati online: li ritrovi su ogni dispositivo.':FB.state==='off'?'☁️ Salvataggio online non attivo: papà o mamma accedono in 📊 Progressi.':''}
@@ -823,6 +1202,8 @@ function bindCloud(){
 document.addEventListener('visibilitychange',()=>{if(!FB.user) return; if(document.hidden){if(dirty) cloudSync();} else cloudSync();});
 render();
 if(T().used>0&&left()<=0) showLock();
+initTheater();
+$('#b-lock-th').onclick=()=>{$('#lock').hidden=true; openTheater();};
 initCloud();
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(e=>console.warn("Service Worker non registrato:",e.message))})}
 </script>
